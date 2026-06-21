@@ -80,7 +80,7 @@ syssim/
 ## Prerequisites
 
 - **Node.js** >= 18
-- **Yarn** 1.22+ (package manager)
+- **npm** >= 9 or **Yarn** 1.22+ (package manager)
 - Modern browser with ES2020+ support (Chrome 90+, Firefox 90+, Safari 15+)
 
 ## Installation
@@ -94,6 +94,12 @@ cd syssim
 
 ### 2. Install dependencies
 
+Using npm:
+```bash
+npm install
+```
+
+Using Yarn:
 ```bash
 yarn install
 ```
@@ -110,11 +116,19 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 cargo install wasm-pack
 
 # Build the WASM engine
+npm run build:wasm
+# or
 yarn build:wasm
 ```
 
 ### 4. Start the development server
 
+Using npm:
+```bash
+npm run dev
+```
+
+Using Yarn:
 ```bash
 yarn dev
 ```
@@ -123,6 +137,12 @@ The app will be available at `http://localhost:3000`.
 
 ### 5. Build for production
 
+Using npm:
+```bash
+npm run build
+```
+
+Using Yarn:
 ```bash
 yarn build
 ```
@@ -131,6 +151,12 @@ Output will be in `apps/web/dist/`.
 
 ### 6. Preview production build
 
+Using npm:
+```bash
+npm run preview
+```
+
+Using Yarn:
 ```bash
 yarn workspace web preview
 ```
@@ -177,6 +203,8 @@ yarn workspace web preview
 Place SVG files in the appropriate `public/icons/<category>/` folder, then run:
 
 ```bash
+npm run build:icons
+# or
 yarn workspace web build:icons
 ```
 
