@@ -1,0 +1,9 @@
+{
+  "name": "sim-engine",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "wasm-pack build --target web --out-dir ../../apps/web/src/wasm",
+    "build:dev": "wasm-pack build --target web --dev --out-dir ../../apps/web/src/wasm"
+  }
+}
