@@ -1,0 +1,6 @@
+*
+!.gitignore
+!simulationController.ts
+!simulationController.d.ts
+!sim_engine.d.ts
+!sim_engine_bg.wasm.d.ts
