@@ -3,4 +3,6 @@
 !simulationController.ts
 !simulationController.d.ts
 !sim_engine.d.ts
+!sim_engine.js
+!sim_engine_bg.wasm
 !sim_engine_bg.wasm.d.ts
