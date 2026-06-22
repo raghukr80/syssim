@@ -2,8 +2,6 @@
 // WASM Simulation Controller
 // Bridges the React frontend to the Rust/WASM simulation engine
 
-import init, { SimController } from './sim_engine.js'
-
 export interface DiagramData {
   nodes: any[]
   edges: any[]
@@ -40,8 +38,6 @@ function convertMetrics(wasmMetrics: Record<string, any>): Record<string, any> {
 function parseResult(json: string): SimulationResult | null {
   try {
     const raw = JSON.parse(json)
-    console.log('[WASM parseResult] raw keys:', Object.keys(raw), 'sample:', JSON.stringify(raw).slice(0, 200))
-    // WASM returns snake_case from Rust serde
     return {
       systemMetrics: {
         totalRps: raw.total_rps ?? raw.totalRps ?? 0,
@@ -60,31 +56,38 @@ function parseResult(json: string): SimulationResult | null {
 
 class SimulationController {
   private wasmReady = false
-  private controller: SimController | null = null
+  private controller: any = null
+  private initPromise: Promise<void> | null = null
 
   async init(diagram: DiagramData) {
-    try {
-      await init()
-      this.controller = new SimController()
+    if (this.initPromise) return this.initPromise
 
-      // Add components from diagram
-      for (const node of diagram.nodes) {
-        const config = JSON.stringify(node.data.config)
-        this.controller!.addComponent(node.id, node.data.componentType, config)
+    this.initPromise = (async () => {
+      try {
+        // Dynamic import to avoid Vite/Rollup resolving at build time
+        const { default: init, SimController } = await import('./sim_engine.js')
+        await init()
+        this.controller = new SimController()
+
+        for (const node of diagram.nodes) {
+          const config = JSON.stringify(node.data.config)
+          this.controller.addComponent(node.id, node.data.componentType, config)
+        }
+
+        for (const edge of diagram.edges) {
+          this.controller.addConnection(edge.source, edge.target)
+        }
+
+        this.wasmReady = true
+        console.log('WASM simulation engine initialized with', diagram.nodes.length, 'components')
+      } catch (e) {
+        console.warn('WASM init failed, using JS fallback:', e)
+        this.wasmReady = false
+        throw e
       }
+    })()
 
-      // Add connections
-      for (const edge of diagram.edges) {
-        this.controller!.addConnection(edge.source, edge.target)
-      }
-
-      this.wasmReady = true
-      console.log('WASM simulation engine initialized with', diagram.nodes.length, 'components')
-    } catch (e) {
-      console.warn('WASM init failed, using JS fallback:', e)
-      this.wasmReady = false
-      throw e // Re-throw so caller knows to use JS fallback
-    }
+    return this.initPromise
   }
 
   start() {
