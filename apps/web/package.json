@@ -16,8 +16,7 @@
     "react-dom": "^18.3.1",
     "zustand": "^5.0.2",
     "recharts": "^2.15.0",
-    "lucide-react": "^0.469.0",
-    "sim-engine": "*"
+    "lucide-react": "^0.469.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.18",

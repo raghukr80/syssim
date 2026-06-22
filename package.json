@@ -1,15 +1,14 @@
 {
-  "name": "syssim-clone",
+  "name": "syssim",
   "private": true,
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "dev": "yarn workspace web dev",
-    "build": "yarn workspace web build",
-    "build:wasm": "yarn workspace sim-engine build",
-    "build:all": "yarn build:wasm && yarn build"
-  },
-  "packageManager": "yarn@1.22.22"
+    "dev": "npm run dev --workspace=web",
+    "build": "npm run build --workspace=web",
+    "build:wasm": "npm run build --workspace=sim-engine",
+    "build:all": "npm run build:wasm && npm run build"
+  }
 }
