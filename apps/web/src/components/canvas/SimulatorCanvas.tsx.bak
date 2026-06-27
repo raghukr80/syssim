@@ -470,20 +470,21 @@ export default function SimulatorCanvas() {
             }}
           >
             <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="var(--color-border)" />
-            <Controls
-              position="bottom-right"
-              showZoom={true}
-              showFitView={true}
-              showInteractive={false}
-              className="!bg-surface !border !border-border !rounded-lg !shadow-lg [&>button]:!bg-surface [&>button]:!border-border [&>button]:!text-text [&>button:hover]:!bg-surface-hover"
-            />
-            <Panel position="bottom-right" className="!mb-14">
-              <div className="flex flex-col gap-1 bg-surface border border-border rounded-lg shadow-lg p-1">
-                <CanvasToolbarButtons
-                  onOpenSuggestions={() => setToolbarMode(toolbarMode === 'suggestions' ? null : 'suggestions')}
-                  onOpenNotes={() => setToolbarMode(toolbarMode === 'notes' ? null : 'notes')}
-                  isTraceActive={isTraceActive}
-                  onClearTrace={clearTrace}
+            <Panel position="bottom-right">
+              <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1 bg-surface border border-border rounded-lg shadow-lg p-1">
+                  <CanvasToolbarButtons
+                    onOpenSuggestions={() => setToolbarMode(toolbarMode === 'suggestions' ? null : 'suggestions')}
+                    onOpenNotes={() => setToolbarMode(toolbarMode === 'notes' ? null : 'notes')}
+                    isTraceActive={isTraceActive}
+                    onClearTrace={clearTrace}
+                  />
+                </div>
+                <Controls
+                  showZoom={true}
+                  showFitView={true}
+                  showInteractive={false}
+                  className="!bg-surface !border !border-border !rounded-lg !shadow-lg [&>button]:!bg-surface [&>button]:!border-border [&>button]:!text-text [&>button:hover]:!bg-surface-hover"
                 />
               </div>
             </Panel>
