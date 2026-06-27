@@ -62,7 +62,16 @@ export function StatusBar() {
         </span>
       </div>
 
-      <div className="flex-1" />
+      <div className="flex-1 flex items-center justify-center">
+        <a
+          href="https://github.com/raghukr80/syssim"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-text-dim hover:text-accent transition-colors text-[10px]"
+        >
+          Idea &amp; Design by raghukr80
+        </a>
+      </div>
 
       <span className="text-text-dim">
         {store.nodes.length} nodes · {store.edges.length} edges
