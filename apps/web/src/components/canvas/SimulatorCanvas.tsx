@@ -46,21 +46,27 @@ export default function SimulatorCanvas() {
         position: n.position,
         data: { ...n.data },
       })))
-      setEdges(store.edges.map(e => ({
-        id: e.id,
-        source: e.source,
-        target: e.target,
-        type: 'smoothstep' as const,
-        animated: false,
-        style: { stroke: 'var(--color-accent)', strokeWidth: 2 },
-        markerEnd: (e.data as Record<string, unknown>)?.showArrow !== false ? {
-          type: 'arrowclosed' as const,
-          color: 'var(--color-accent)',
-          width: 15,
-          height: 15,
-        } : undefined,
-        label: e.data?.label,
-      })))
+      setEdges(store.edges.map(e => {
+        const srcNode = store.nodes.find(n => n.id === e.source)
+        const tgtNode = store.nodes.find(n => n.id === e.target)
+        const defaultLabel = `${srcNode?.data.label || e.source} → ${tgtNode?.data.label || e.target}`
+        return {
+          id: e.id,
+          source: e.source,
+          target: e.target,
+          type: 'smoothstep' as const,
+          animated: false,
+          style: { stroke: 'var(--color-accent)', strokeWidth: 2 },
+          markerEnd: (e.data as Record<string, unknown>)?.showArrow !== false ? {
+            type: 'arrowclosed' as const,
+            color: 'var(--color-accent)',
+            width: 15,
+            height: 15,
+          } : undefined,
+          label: e.data?.label || defaultLabel,
+          data: { ...e.data, label: e.data?.label || defaultLabel },
+        }
+      }))
       syncingFromStore.current = false
     }
   }, [store.nodes, store.edges, nodes.length, setNodes, setEdges])

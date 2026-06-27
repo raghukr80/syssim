@@ -59,8 +59,8 @@ export function EdgePropertiesPanel({ edge, onDelete, onClose }: EdgePropertiesP
         {/* Connection info */}
         <div>
           <label className="text-[9px] font-semibold text-text-dim uppercase tracking-wider">Connection</label>
-          <div className="mt-1 text-[10px] text-text font-mono bg-bg rounded px-2 py-1.5 border border-border">
-            {edge.source} → {edge.target}
+          <div className="mt-1 text-[10px] text-text bg-bg rounded px-2 py-1.5 border border-border">
+            {store.nodes.find(n => n.id === edge.source)?.data.label || edge.source} → {store.nodes.find(n => n.id === edge.target)?.data.label || edge.target}
           </div>
         </div>
 
