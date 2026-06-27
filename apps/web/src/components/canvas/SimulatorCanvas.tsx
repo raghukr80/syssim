@@ -183,13 +183,34 @@ export default function SimulatorCanvas() {
   // ── Connect handler ──
   const onConnect: OnConnect = useCallback(
     (params) => {
-      // params includes source, target, sourceHandle, targetHandle
+      // Determine the user's intended source based on which handle they started from
+      // ReactFlow may swap source/target so source is always the "source" type handle
+      // We need to check if the user started from a target handle (meaning they dragged
+      // FROM a target TO a source, so we need to reverse the direction)
+      let source = params.source!
+      let target = params.target!
+      let sourceHandle = params.sourceHandle
+      let targetHandle = params.targetHandle
+
+      // If the connection was made from a target handle to a source handle,
+      // ReactFlow may have swapped them. We detect this by checking if the
+      // sourceHandle ID contains "target" — if so, we need to reverse.
+      if (sourceHandle && sourceHandle.includes('target')) {
+        // User started from a target handle — swap direction
+        const tmp = source
+        source = target
+        target = tmp
+        const tmpH = sourceHandle
+        sourceHandle = targetHandle
+        targetHandle = tmpH
+      }
+
       const edge: Edge = {
-        id: `edge_${params.source}_${params.target}_${Date.now()}`,
-        source: params.source!,
-        target: params.target!,
-        sourceHandle: params.sourceHandle,
-        targetHandle: params.targetHandle,
+        id: `edge_${source}_${target}_${Date.now()}`,
+        source,
+        target,
+        sourceHandle,
+        targetHandle,
         type: 'smoothstep',
         animated: store.simState === 'running',
         style: { stroke: 'var(--color-accent)', strokeWidth: 2 },
