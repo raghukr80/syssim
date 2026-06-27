@@ -15,9 +15,14 @@ export function EventLog() {
   const clearEvents = useDiagramStore(s => s.clearEvents)
   const scrollRef = useRef<HTMLDivElement>(null)
   const autoScroll = useRef(true)
-  const [position, setPosition] = useState({ x: 16, y: 16 })
+  const [position, setPosition] = useState({ x: 16, y: 0 })
   const [dragging, setDragging] = useState(false)
   const dragStart = useRef({ mouseX: 0, mouseY: 0, posX: 0, posY: 0 })
+
+  // Initialize position on mount — place at bottom-left
+  useEffect(() => {
+    setPosition({ x: 16, y: window.innerHeight - 300 })
+  }, [])
 
   // Auto-scroll to bottom when new events arrive
   useEffect(() => {
@@ -33,7 +38,7 @@ export function EventLog() {
     }
   }
 
-  // Drag handlers — use bottom positioning with proper offset calculation
+  // Drag handlers — simple delta-based movement with top positioning
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button')) return
     setDragging(true)
@@ -52,8 +57,7 @@ export function EventLog() {
       const dx = e.clientX - dragStart.current.mouseX
       const dy = e.clientY - dragStart.current.mouseY
       const newX = Math.max(0, Math.min(dragStart.current.posX + dx, window.innerWidth - 400))
-      // For bottom positioning: moving mouse UP (negative dy) should INCREASE bottom value
-      const newY = Math.max(0, Math.min(dragStart.current.posY - dy, window.innerHeight - 300))
+      const newY = Math.max(0, Math.min(dragStart.current.posY + dy, window.innerHeight - 300))
       setPosition({ x: newX, y: newY })
     }
 
@@ -96,7 +100,7 @@ export function EventLog() {
       className="fixed z-20 w-[380px] max-h-[280px] bg-surface/95 border border-border rounded-lg shadow-2xl backdrop-blur-sm flex flex-col overflow-hidden"
       style={{
         left: `${position.x}px`,
-        bottom: `${position.y}px`,
+        top: `${position.y}px`,
       }}
     >
       {/* Header — drag handle */}
