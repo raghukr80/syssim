@@ -5,118 +5,85 @@ import { Lightbulb, StickyNote, Route, X, ChevronRight, RotateCcw } from 'lucide
 type ToolbarMode = null | 'suggestions' | 'notes' | 'trace'
 
 // ─── Toolbar Buttons (for Controls panel) ──
-export function CanvasToolbarButtons() {
-  const store = useDiagramStore()
-  const [mode, setMode] = useState<ToolbarMode>(null)
-
-  const toggle = (m: ToolbarMode) => {
-    const newMode = mode === m ? null : m
-    setMode(newMode)
-    if (m === 'trace' && newMode === 'trace') {
-      store.setTraceMode(true)
-    } else if (m === 'trace' && newMode !== 'trace') {
-      store.setTraceMode(false)
-      store.clearTrace()
-    }
-  }
-
-  const isTraceActive = mode === 'trace' && store.tracePath.length > 0
-
+export function CanvasToolbarButtons({ onOpenSuggestions, onOpenNotes, isTraceActive, onClearTrace }: {
+  onOpenSuggestions: () => void
+  onOpenNotes: () => void
+  isTraceActive: boolean
+  onClearTrace: () => void
+}) {
   return (
-    <>
-      <div className="flex flex-col gap-1">
-        <button
-          onClick={() => toggle('suggestions')}
-          className={`p-1.5 rounded transition-all ${
-            mode === 'suggestions'
-              ? 'bg-accent text-white'
-              : 'text-text-dim hover:text-text hover:bg-surface-hover'
-          }`}
-          title="Suggestions"
-        >
-          <Lightbulb className="w-3.5 h-3.5" />
-        </button>
-        <button
-          onClick={() => toggle('notes')}
-          className={`p-1.5 rounded transition-all ${
-            mode === 'notes'
-              ? 'bg-accent text-white'
-              : 'text-text-dim hover:text-text hover:bg-surface-hover'
-          }`}
-          title="Architecture Notes"
-        >
-          <StickyNote className="w-3.5 h-3.5" />
-        </button>
-        <button
-          onClick={() => toggle('trace')}
-          className={`p-1.5 rounded transition-all ${
-            mode === 'trace'
-              ? 'bg-accent text-white'
-              : 'text-text-dim hover:text-text hover:bg-surface-hover'
-          }`}
-          title="Trace Request Flow"
-        >
-          <Route className="w-3.5 h-3.5" />
-        </button>
-        {isTraceActive && (
-          <button
-            onClick={() => store.clearTrace()}
-            className="p-1.5 rounded text-text-dim hover:text-error transition-all"
-            title="Clear Trace"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-          </button>
-        )}
-      </div>
-
-      {/* Trace breadcrumb at top */}
+    <div className="flex flex-col gap-1">
+      <button
+        onClick={onOpenSuggestions}
+        className="p-1.5 rounded text-text-dim hover:text-text hover:bg-surface-hover transition-all"
+        title="Suggestions"
+      >
+        <Lightbulb className="w-3.5 h-3.5" />
+      </button>
+      <button
+        onClick={onOpenNotes}
+        className="p-1.5 rounded text-text-dim hover:text-text hover:bg-surface-hover transition-all"
+        title="Architecture Notes"
+      >
+        <StickyNote className="w-3.5 h-3.5" />
+      </button>
+      <button
+        className="p-1.5 rounded text-text-dim hover:text-text hover:bg-surface-hover transition-all"
+        title="Trace Request Flow"
+      >
+        <Route className="w-3.5 h-3.5" />
+      </button>
       {isTraceActive && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 bg-surface/95 border border-border rounded-lg shadow-lg px-3 py-2 backdrop-blur-sm max-w-[80%] overflow-x-auto">
-          {store.tracePath.map((nodeId, i) => {
-            const node = store.nodes.find(n => n.id === nodeId)
-            const label = node?.data.label || nodeId
-            return (
-              <div key={i} className="flex items-center gap-1 shrink-0">
-                {i > 0 && (
-                  <span className="flex items-center justify-center w-4 h-4 rounded-full bg-accent text-white text-[8px] font-bold shrink-0">
-                    {i}
-                  </span>
-                )}
-                <span className={`text-[10px] font-medium ${i === 0 ? 'text-accent' : i === store.tracePath.length - 1 ? 'text-success' : 'text-text'}`}>
-                  {label}
-                </span>
-                {i < store.tracePath.length - 1 && (
-                  <ChevronRight className="w-3 h-3 text-text-dim shrink-0" />
-                )}
-              </div>
-            )
-          })}
-        </div>
+        <button
+          onClick={onClearTrace}
+          className="p-1.5 rounded text-text-dim hover:text-error transition-all"
+          title="Clear Trace"
+        >
+          <RotateCcw className="w-3.5 h-3.5" />
+        </button>
       )}
+    </div>
+  )
+}
 
-      {/* Suggestions panel */}
-      {mode === 'suggestions' && (
-        <SuggestionsPanel onClose={() => setMode(null)} />
-      )}
-
-      {/* Notes panel */}
-      {mode === 'notes' && (
-        <NotesPanel onClose={() => setMode(null)} />
-      )}
-    </>
+// ─── Trace Breadcrumb ──
+export function TraceBreadcrumb() {
+  const store = useDiagramStore()
+  if (store.tracePath.length === 0) return null
+  return (
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 bg-surface/95 border border-border rounded-lg shadow-lg px-3 py-2 backdrop-blur-sm max-w-[80%] overflow-x-auto">
+      {store.tracePath.map((nodeId, i) => {
+        const node = store.nodes.find(n => n.id === nodeId)
+        const label = node?.data.label || nodeId
+        return (
+          <div key={i} className="flex items-center gap-1 shrink-0">
+            {i > 0 && (
+              <span className="flex items-center justify-center w-4 h-4 rounded-full bg-accent text-white text-[8px] font-bold shrink-0">
+                {i}
+              </span>
+            )}
+            <span className={`text-[10px] font-medium ${i === 0 ? 'text-accent' : i === store.tracePath.length - 1 ? 'text-success' : 'text-text'}`}>
+              {label}
+            </span>
+            {i < store.tracePath.length - 1 && (
+              <ChevronRight className="w-3 h-3 text-text-dim shrink-0" />
+            )}
+          </div>
+        )
+      })}
+    </div>
   )
 }
 
 // ─── Suggestions Panel ──
-function SuggestionsPanel({ onClose }: { onClose: () => void }) {
+export function SuggestionsPanel({ onClose }: { onClose: () => void }) {
   const store = useDiagramStore()
   const nodes = store.nodes
   const edges = store.edges
-
   const suggestions = generateSuggestions(nodes, edges)
 
   return (
-    <div className="absolute right-0 top-full mt-1 z-30 w-72 bg-surface border border-border rounded-lg shadow-2xl overflow-hidden">
+    <div className="fixed right-16 bottom-28 z-40 w-72 bg-surface border border-border rounded-lg shadow-2xl overflow-hidden">
       <div className="flex items-center justify-between px-3 py-2 border-b border-border">
         <div className="flex items-center gap-2">
           <Lightbulb className="w-3.5 h-3.5 text-accent" />
@@ -147,7 +114,7 @@ function SuggestionsPanel({ onClose }: { onClose: () => void }) {
 }
 
 // ─── Notes Panel ──
-function NotesPanel({ onClose }: { onClose: () => void }) {
+export function NotesPanel({ onClose }: { onClose: () => void }) {
   const store = useDiagramStore()
   const [notes, setNotes] = useState(store.architectureNotes || '')
   const [saving, setSaving] = useState(false)
@@ -159,7 +126,7 @@ function NotesPanel({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="absolute right-0 top-full mt-1 z-30 w-72 bg-surface border border-border rounded-lg shadow-2xl overflow-hidden">
+    <div className="fixed right-16 bottom-28 z-40 w-72 bg-surface border border-border rounded-lg shadow-2xl overflow-hidden">
       <div className="flex items-center justify-between px-3 py-2 border-b border-border">
         <div className="flex items-center gap-2">
           <StickyNote className="w-3.5 h-3.5 text-accent" />

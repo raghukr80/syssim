@@ -15,7 +15,7 @@ import { MetricsPanel } from '../metrics/MetricsPanel'
 import { EventLog } from '../metrics/EventLog'
 import { ReportModal } from '../metrics/ReportModal'
 import { SimulationControls } from '../toolbar/SimulationControls'
-import { CanvasToolbarButtons } from './CanvasToolbar'
+import { CanvasToolbarButtons, TraceBreadcrumb, SuggestionsPanel, NotesPanel } from './CanvasToolbar'
 import { useLayoutZones, LayoutZonesRenderer } from './LayoutZones'
 
 const nodeTypes: NodeTypes = {
@@ -146,6 +146,10 @@ export default function SimulatorCanvas() {
   const traceEdgeNumbers = useDiagramStore(s => s.traceEdgeNumbers)
   const addTraceNode = useDiagramStore(s => s.addTraceNode)
   const clearTrace = useDiagramStore(s => s.clearTrace)
+
+  // ── Toolbar panels ──
+  const [toolbarMode, setToolbarMode] = useState<string | null>(null)
+  const isTraceActive = isTraceMode && tracePath.length > 0
 
   const onNodeClickHandler = useCallback((_e: React.MouseEvent, node: Node) => {
     if (isTraceMode) {
@@ -473,9 +477,14 @@ export default function SimulatorCanvas() {
               showInteractive={false}
               className="!bg-surface !border !border-border !rounded-lg !shadow-lg [&>button]:!bg-surface [&>button]:!border-border [&>button]:!text-text [&>button:hover]:!bg-surface-hover"
             />
-            <Panel position="bottom-right" className="!mt-14">
+            <Panel position="bottom-right" className="!mb-14">
               <div className="flex flex-col gap-1 bg-surface border border-border rounded-lg shadow-lg p-1">
-                <CanvasToolbarButtons />
+                <CanvasToolbarButtons
+                  onOpenSuggestions={() => setToolbarMode(toolbarMode === 'suggestions' ? null : 'suggestions')}
+                  onOpenNotes={() => setToolbarMode(toolbarMode === 'notes' ? null : 'notes')}
+                  isTraceActive={isTraceActive}
+                  onClearTrace={clearTrace}
+                />
               </div>
             </Panel>
             <Panel position="top-right">
@@ -513,6 +522,13 @@ export default function SimulatorCanvas() {
 
       <EventLog />
       <ReportModal />
+
+      {/* Trace breadcrumb */}
+      <TraceBreadcrumb />
+
+      {/* Toolbar panels */}
+      {toolbarMode === 'suggestions' && <SuggestionsPanel onClose={() => setToolbarMode(null)} />}
+      {toolbarMode === 'notes' && <NotesPanel onClose={() => setToolbarMode(null)} />}
 
       {/* Inline edge label editor */}
       {editingEdgeId && (
