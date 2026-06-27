@@ -182,21 +182,40 @@ export default function SimulatorCanvas() {
   )
 
   // ── Edge double-click to edit label ──
+  const [editingEdgeId, setEditingEdgeId] = useState<string | null>(null)
+  const [editingLabel, setEditingLabel] = useState('')
+  const [editingPos, setEditingPos] = useState({ x: 0, y: 0 })
+  const editInputRef = useRef<HTMLInputElement>(null)
+
   const onEdgeDoubleClick = useCallback((_e: React.MouseEvent, edge: Edge) => {
-    const currentLabel = (edge.data as Record<string, unknown>)?.label as string || ''
-    const newLabel = prompt('Enter edge label:', currentLabel)
-    if (newLabel !== null && newLabel !== currentLabel) {
-      setEdges(eds => eds.map(ed =>
-        ed.id === edge.id
-          ? { ...ed, label: newLabel, data: { ...ed.data, label: newLabel } }
-          : ed
-      ))
-      const updatedEdges = store.edges.map((se: any) =>
-        se.id === edge.id ? { ...se, data: { ...se.data, label: newLabel } } : se
-      )
-      store.setEdges(updatedEdges)
+    const rect = (_e.target as HTMLElement).getBoundingClientRect()
+    setEditingEdgeId(edge.id)
+    setEditingLabel((edge.data as Record<string, unknown>)?.label as string || '')
+    setEditingPos({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
+  }, [])
+
+  useEffect(() => {
+    if (editingEdgeId && editInputRef.current) {
+      editInputRef.current.focus()
+      editInputRef.current.select()
     }
-  }, [setEdges, store])
+  }, [editingEdgeId])
+
+  const commitLabel = useCallback(() => {
+    if (!editingEdgeId) return
+    const newLabel = editingLabel.trim()
+    setEdges(eds => eds.map(ed =>
+      ed.id === editingEdgeId
+        ? { ...ed, label: newLabel, data: { ...ed.data, label: newLabel } }
+        : ed
+    ))
+    const updatedEdges = store.edges.map((se: any) =>
+      se.id === editingEdgeId ? { ...se, data: { ...se.data, label: newLabel } } : se
+    )
+    store.setEdges(updatedEdges)
+    setEditingEdgeId(null)
+    setEditingLabel('')
+  }, [editingEdgeId, editingLabel, setEdges, store])
 
   // ── Track connection direction manually ──
   // We use onConnectStart to remember which node the user grabbed,
@@ -473,6 +492,28 @@ export default function SimulatorCanvas() {
 
       <EventLog />
       <ReportModal />
+
+      {/* Inline edge label editor */}
+      {editingEdgeId && (
+        <div
+          className="fixed z-[100] pointer-events-auto"
+          style={{ left: editingPos.x, top: editingPos.y, transform: 'translate(-50%, -50%)' }}
+        >
+          <input
+            ref={editInputRef}
+            value={editingLabel}
+            onChange={e => setEditingLabel(e.target.value)}
+            onBlur={commitLabel}
+            onKeyDown={e => {
+              if (e.key === 'Enter') commitLabel()
+              if (e.key === 'Escape') { setEditingEdgeId(null); setEditingLabel('') }
+            }}
+            placeholder="Label"
+            className="px-2 py-1 text-[11px] text-text bg-surface border border-accent rounded shadow-lg outline-none w-32 text-center"
+            maxLength={40}
+          />
+        </div>
+      )}
     </div>
   )
 }
