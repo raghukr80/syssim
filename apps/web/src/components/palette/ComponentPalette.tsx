@@ -28,21 +28,23 @@ const CHAOS_SCENARIOS: ChaosDefinition[] = [
   // Traffic
   { id: 'traffic-surge', name: 'Traffic Surge', category: 'traffic', icon: '🌊', description: '10x normal traffic spike', targetTypes: ['load_balancer', 'api_gateway', 'api_management', 'web_server', 'microservice', 'serverless', 'container_cluster', 'graphql', 'websocket', 'service_mesh', 'ml_model', 'recommendation_engine', 'custom_component'] },
   { id: 'thundering-herd', name: 'Thundering Herd', category: 'traffic', icon: '🦬', description: 'Simultaneous cache expiry causes DB overload', targetTypes: ['cache', 'database', 'search_engine', 'graph_database', 'time_series_db', 'document_store', 'key_value_store', 'custom_component'] },
-  { id: 'connection-exhaustion', name: 'Connection Pool Exhaustion', category: 'traffic', icon: '🔗', description: 'All connections consumed, new requests queued', targetTypes: ['database', 'search_engine', 'graph_database', 'time_series_db', 'document_store', 'key_value_store', 'data_warehouse', 'web_server', 'microservice', 'container_cluster', 'third_party_api', 'identity_provider', 'custom_component'], failureRate: 0.15 },
   { id: 'ddos-attack', name: 'DDoS Attack', category: 'traffic', icon: '🚨', description: 'Volumetric DDoS saturates inbound bandwidth', targetTypes: ['load_balancer', 'api_gateway', 'waf', 'cdn'], failureRate: 0.8 },
 
   // Data
   { id: 'data-corruption', name: 'Data Corruption', category: 'data', icon: '☢️', description: '5% of reads return corrupted data', targetTypes: ['database', 'cache', 'storage', 'data_lake', 'search_engine', 'graph_database', 'time_series_db', 'document_store', 'key_value_store', 'data_warehouse', 'feature_store', 'custom_component'], failureRate: 0.05 },
   { id: 'replication-lag', name: 'Replication Lag', category: 'data', icon: '⏱️', description: 'Replica lags 5s behind primary — stale reads', targetTypes: ['database', 'search_engine', 'graph_database', 'time_series_db', 'document_store', 'key_value_store', 'cache', 'custom_component'], latencyInjection: { delayMs: 5000, jitterMs: 1000 } },
   { id: 'cache-poisoning', name: 'Cache Poisoning', category: 'data', icon: '☠️', description: 'Invalid data injected into cache — all hits return bad data', targetTypes: ['cache', 'custom_component'], failureRate: 0.3 },
-  { id: 'db-deadlock', name: 'Database Deadlock', category: 'data', icon: '🔒', description: 'Deadlocks cause query timeouts and rollbacks', targetTypes: ['database'], failureRate: 0.25 },
-  { id: 'data-loss', name: 'Data Loss', category: 'data', icon: '🗑️', description: 'Partial data loss — recent writes unrecoverable', targetTypes: ['database', 'storage'], failureRate: 0.1 },
+  { id: 'db-deadlock', name: 'Database Deadlock', category: 'data', icon: '🔒', description: 'Deadlocks cause query timeouts and rollbacks', targetTypes: ['database', 'search_engine', 'graph_database', 'time_series_db', 'document_store', 'key_value_store', 'data_warehouse', 'custom_component'], failureRate: 0.25 },
+  { id: 'connection-pool-exhaustion', name: 'Connection Pool Exhaustion', category: 'data', icon: '🔗', description: 'All DB connections consumed — new queries queued or rejected', targetTypes: ['database', 'search_engine', 'graph_database', 'time_series_db', 'document_store', 'key_value_store', 'data_warehouse', 'web_server', 'microservice', 'container_cluster', 'third_party_api', 'identity_provider', 'custom_component'], failureRate: 0.20 },
+  { id: 'data-loss', name: 'Data Loss', category: 'data', icon: '🗑️', description: 'Partial data loss — recent writes unrecoverable', targetTypes: ['database', 'storage', 'data_lake', 'data_warehouse', 'search_engine', 'graph_database', 'time_series_db', 'document_store', 'key_value_store', 'feature_store', 'custom_component'], failureRate: 0.1 },
 
   // Application
   { id: 'deployment-bug', name: 'Bad Deployment', category: 'application', icon: '🐛', description: 'New deploy causes 5xx errors on 20% of requests', targetTypes: ['web_server', 'microservice', 'serverless', 'container_cluster', 'graphql', 'websocket', 'worker', 'cron_job', 'api_gateway', 'api_management', 'service_mesh', 'ml_model', 'recommendation_engine', 'custom_component'], failureRate: 0.2 },
   { id: 'config-error', name: 'Config Misconfiguration', category: 'application', icon: '⚙️', description: 'Wrong config causes all requests to fail', targetTypes: ['web_server', 'microservice', 'serverless', 'container_cluster', 'graphql', 'websocket', 'worker', 'load_balancer', 'api_gateway', 'api_management', 'waf', 'service_mesh', 'secrets_manager', 'identity_provider', 'monitoring', 'logging', 'tracing', 'alerting', 'custom_component'], failureRate: 1.0 },
   { id: 'memory-leak', name: 'Memory Leak', category: 'application', icon: '💧', description: 'Gradual memory leak degrades performance over time', targetTypes: ['web_server', 'microservice', 'container_cluster', 'graphql', 'websocket', 'worker', 'database', 'search_engine', 'ml_model', 'custom_component'], memoryPressure: 0.7 },
   { id: 'api-rate-limit', name: 'API Rate Limit Hit', category: 'application', icon: '🚫', description: 'API rate limiting returns 429 errors', targetTypes: ['api_gateway', 'load_balancer', 'web_server', 'serverless'], failureRate: 0.5 },
+  { id: 'thread-pool-exhaustion', name: 'Thread Pool Exhaustion', category: 'application', icon: '🧵', description: 'All worker threads busy — requests stall or timeout', targetTypes: ['web_server', 'microservice', 'container_cluster', 'graphql', 'websocket', 'worker', 'load_balancer', 'api_gateway', 'api_management', 'service_mesh', 'ml_model', 'recommendation_engine', 'custom_component'], failureRate: 0.35 },
+  { id: 'cascading-failure', name: 'Cascading Failure', category: 'application', icon: '💥', description: 'One service failure triggers downstream outages', targetTypes: ['web_server', 'microservice', 'container_cluster', 'graphql', 'websocket', 'worker', 'load_balancer', 'api_gateway', 'api_management', 'service_mesh', 'database', 'cache', 'search_engine', 'message_queue', 'event_bus', 'notification_service', 'email_service', 'sms_service', 'third_party_api', 'identity_provider', 'ml_model', 'ml_training', 'vector_search', 'recommendation_engine', 'custom_component'], failureRate: 0.6 },
 
   // Dependency
   { id: 'third-party-down', name: 'Third-Party Down', category: 'dependency', icon: '🔴', description: 'External API completely unreachable', targetTypes: ['third_party_api', 'notification_service', 'email_service', 'sms_service', 'identity_provider', 'custom_component'], failureRate: 1.0 },
@@ -92,13 +94,13 @@ const CATEGORY_CONFIG: Record<ChaosCategory, { label: string; icon: React.ReactN
     label: 'Data Layer',
     icon: <Database className="w-3.5 h-3.5" />,
     color: 'text-purple-400 bg-purple-400/10 border-purple-400/30',
-    description: 'Corruption, replication lag, deadlocks, data loss',
+    description: 'Corruption, replication lag, deadlocks, connection pool, data loss',
   },
   application: {
     label: 'Application',
     icon: <Code className="w-3.5 h-3.5" />,
     color: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/30',
-    description: 'Bad deploys, config errors, memory leaks, rate limits',
+    description: 'Bad deploys, config errors, memory leaks, rate limits, thread pool, cascading',
   },
   dependency: {
     label: 'Dependency',
