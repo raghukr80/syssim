@@ -24,7 +24,7 @@ export function CanvasToolbarButtons() {
 
   return (
     <>
-      <div className="flex items-center gap-1">
+      <div className="flex flex-col gap-1">
         <button
           onClick={() => toggle('suggestions')}
           className={`p-1.5 rounded transition-all ${

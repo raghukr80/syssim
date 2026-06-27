@@ -472,9 +472,12 @@ export default function SimulatorCanvas() {
               showFitView={true}
               showInteractive={false}
               className="!bg-surface !border !border-border !rounded-lg !shadow-lg [&>button]:!bg-surface [&>button]:!border-border [&>button]:!text-text [&>button:hover]:!bg-surface-hover"
-            >
-              <CanvasToolbarButtons />
-            </Controls>
+            />
+            <Panel position="bottom-right" className="!mt-14">
+              <div className="flex flex-col gap-1 bg-surface border border-border rounded-lg shadow-lg p-1">
+                <CanvasToolbarButtons />
+              </div>
+            </Panel>
             <Panel position="top-right">
               <SimulationControls />
             </Panel>
@@ -510,7 +513,6 @@ export default function SimulatorCanvas() {
 
       <EventLog />
       <ReportModal />
-      <CanvasToolbarButtons />
 
       {/* Inline edge label editor */}
       {editingEdgeId && (
