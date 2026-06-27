@@ -23,7 +23,7 @@ export function MetricsPanel() {
   }, {})).sort(([, a]: any, [, b]: any) => b.utilization - a.utilization).slice(0, 5)
 
   return (
-    <div className="absolute inset-0 z-50 bg-bg/95 flex flex-col overflow-hidden">
+    <div className="absolute inset-0 z-50 bg-bg flex flex-col overflow-hidden">
       <div className="h-14 border-b border-border flex items-center justify-between px-6 shrink-0">
         <h2 className="text-lg font-bold text-text">System Metrics Analysis</h2>
         <button onClick={() => store.toggleMetrics()} className="p-2 rounded hover:bg-surface-hover text-text-dim hover:text-text">
