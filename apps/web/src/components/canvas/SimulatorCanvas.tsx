@@ -46,27 +46,22 @@ export default function SimulatorCanvas() {
         position: n.position,
         data: { ...n.data },
       })))
-      setEdges(store.edges.map(e => {
-        const srcNode = store.nodes.find(n => n.id === e.source)
-        const tgtNode = store.nodes.find(n => n.id === e.target)
-        const defaultLabel = `${srcNode?.data.label || e.source} → ${tgtNode?.data.label || e.target}`
-        return {
-          id: e.id,
-          source: e.source,
-          target: e.target,
-          type: 'smoothstep' as const,
-          animated: false,
-          style: { stroke: 'var(--color-accent)', strokeWidth: 2 },
-          markerEnd: (e.data as Record<string, unknown>)?.showArrow !== false ? {
-            type: 'arrowclosed' as const,
-            color: 'var(--color-accent)',
-            width: 15,
-            height: 15,
-          } : undefined,
-          label: e.data?.label || defaultLabel,
-          data: { ...e.data, label: e.data?.label || defaultLabel },
-        }
-      }))
+      setEdges(store.edges.map(e => ({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        type: 'smoothstep' as const,
+        animated: false,
+        style: { stroke: 'var(--color-accent)', strokeWidth: 2 },
+        markerEnd: (e.data as Record<string, unknown>)?.showArrow !== false ? {
+          type: 'arrowclosed' as const,
+          color: 'var(--color-accent)',
+          width: 15,
+          height: 15,
+        } : undefined,
+        label: e.data?.label || '',
+        data: { ...e.data, label: e.data?.label || '' },
+      })))
       syncingFromStore.current = false
     }
   }, [store.nodes, store.edges, nodes.length, setNodes, setEdges])
@@ -185,6 +180,23 @@ export default function SimulatorCanvas() {
     },
     [store]
   )
+
+  // ── Edge double-click to edit label ──
+  const onEdgeDoubleClick = useCallback((_e: React.MouseEvent, edge: Edge) => {
+    const currentLabel = (edge.data as Record<string, unknown>)?.label as string || ''
+    const newLabel = prompt('Enter edge label:', currentLabel)
+    if (newLabel !== null && newLabel !== currentLabel) {
+      setEdges(eds => eds.map(ed =>
+        ed.id === edge.id
+          ? { ...ed, label: newLabel, data: { ...ed.data, label: newLabel } }
+          : ed
+      ))
+      const updatedEdges = store.edges.map((se: any) =>
+        se.id === edge.id ? { ...se, data: { ...se.data, label: newLabel } } : se
+      )
+      store.setEdges(updatedEdges)
+    }
+  }, [setEdges, store])
 
   // ── Track connection direction manually ──
   // We use onConnectStart to remember which node the user grabbed,
@@ -403,6 +415,7 @@ export default function SimulatorCanvas() {
             onConnect={onConnect}
             onConnectStart={onConnectStart}
             onConnectEnd={onConnectEnd}
+            onEdgeDoubleClick={onEdgeDoubleClick}
             onSelectionChange={onSelectionChange}
             nodeTypes={nodeTypes}
             connectionMode={ConnectionMode.Loose}
