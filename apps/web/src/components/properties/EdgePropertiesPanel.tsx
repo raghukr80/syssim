@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useDiagramStore } from '../../stores/diagramStore'
-import { X, Trash2 } from 'lucide-react'
+import { X, Trash2, ArrowRight } from 'lucide-react'
 import type { Edge } from '@xyflow/react'
 
 interface EdgePropertiesPanelProps {
@@ -18,6 +18,7 @@ export function EdgePropertiesPanel({ edge, onDelete, onClose }: EdgePropertiesP
   const [bandwidthMbps, setBandwidthMbps] = useState(String(edgeData.bandwidthMbps || 1000))
   const [latencyMs, setLatencyMs] = useState(String(edgeData.latencyMs || 0))
   const [encrypted, setEncrypted] = useState(Boolean(edgeData.encrypted || false))
+  const [showArrow, setShowArrow] = useState(Boolean(edgeData.showArrow !== false))
 
   const handleSave = () => {
     const updatedData = {
@@ -26,6 +27,7 @@ export function EdgePropertiesPanel({ edge, onDelete, onClose }: EdgePropertiesP
       bandwidthMbps: Number(bandwidthMbps) || 1000,
       latencyMs: Number(latencyMs) || 0,
       encrypted,
+      showArrow,
     }
     // Update edge in store
     const updatedEdges = store.edges.map((e: any) =>
@@ -158,6 +160,18 @@ export function EdgePropertiesPanel({ edge, onDelete, onClose }: EdgePropertiesP
             className={`relative w-8 h-4 rounded-full transition-colors ${encrypted ? 'bg-accent' : 'bg-border'}`}
           >
             <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform ${encrypted ? 'left-4.5' : 'left-0.5'}`} />
+          </button>
+        </div>
+
+        {/* Show Arrow */}
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] text-text-dim flex items-center gap-1"><ArrowRight className="w-3 h-3" /> Show Arrow</span>
+          <button
+            type="button"
+            onClick={() => { setShowArrow(!showArrow); handleSave() }}
+            className={`relative w-8 h-4 rounded-full transition-colors ${showArrow ? 'bg-accent' : 'bg-border'}`}
+          >
+            <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform ${showArrow ? 'left-4.5' : 'left-0.5'}`} />
           </button>
         </div>
 

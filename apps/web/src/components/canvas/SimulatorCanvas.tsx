@@ -53,6 +53,12 @@ export default function SimulatorCanvas() {
         type: 'smoothstep' as const,
         animated: false,
         style: { stroke: 'var(--color-accent)', strokeWidth: 2 },
+        markerEnd: (e.data as Record<string, unknown>)?.showArrow !== false ? {
+          type: 'arrowclosed' as const,
+          color: 'var(--color-accent)',
+          width: 15,
+          height: 15,
+        } : undefined,
         label: e.data?.label,
       })))
       syncingFromStore.current = false
@@ -135,15 +141,24 @@ export default function SimulatorCanvas() {
   // ── Edge animated state ──
   useEffect(() => {
     setEdges(currentEdges =>
-      currentEdges.map(e => ({
-        ...e,
-        animated: store.simState === 'running',
-        style: {
-          ...e.style,
-          stroke: store.simState === 'running' ? 'var(--color-accent)' : 'var(--color-border)',
-          strokeWidth: store.simState === 'running' ? 2 : 1.5,
-        },
-      }))
+      currentEdges.map(e => {
+        const showArrow = (e.data as Record<string, unknown>)?.showArrow !== false
+        return {
+          ...e,
+          animated: store.simState === 'running',
+          style: {
+            ...e.style,
+            stroke: store.simState === 'running' ? 'var(--color-accent)' : 'var(--color-border)',
+            strokeWidth: store.simState === 'running' ? 2 : 1.5,
+          },
+          markerEnd: showArrow ? {
+            type: 'arrowclosed' as const,
+            color: store.simState === 'running' ? 'var(--color-accent)' : 'var(--color-border)',
+            width: 15,
+            height: 15,
+          } : undefined,
+        }
+      })
     )
   }, [store.simState, setEdges])
 
@@ -178,12 +193,19 @@ export default function SimulatorCanvas() {
         type: 'smoothstep',
         animated: store.simState === 'running',
         style: { stroke: 'var(--color-accent)', strokeWidth: 2 },
+        markerEnd: {
+          type: 'arrowclosed' as const,
+          color: 'var(--color-accent)',
+          width: 15,
+          height: 15,
+        },
         data: {
           label: '',
           protocol: 'HTTP',
           bandwidthMbps: 1000,
           latencyMs: 0,
           encrypted: false,
+          showArrow: true,
         },
       }
       setEdges(eds => addEdge(edge, eds))
