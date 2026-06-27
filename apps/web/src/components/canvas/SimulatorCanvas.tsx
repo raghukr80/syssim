@@ -180,33 +180,41 @@ export default function SimulatorCanvas() {
     [store]
   )
 
+  // ── Track connection direction manually ──
+  // We use onConnectStart to remember which node the user grabbed,
+  // so we can set source/target correctly regardless of handle type.
+  const connectingNodeRef = useRef<string | null>(null)
+
+  const onConnectStart = useCallback((_: any) => {
+    connectingNodeRef.current = _.nodeId
+  }, [])
+
+  const onConnectEnd = useCallback(() => {
+    connectingNodeRef.current = null
+  }, [])
+
   // ── Connect handler ──
   const onConnect: OnConnect = useCallback(
     (params) => {
-      // Determine the user's intended source based on which handle they started from
-      // ReactFlow may swap source/target so source is always the "source" type handle
-      // We need to check if the user started from a target handle (meaning they dragged
-      // FROM a target TO a source, so we need to reverse the direction)
+      // Use the node the user actually grabbed as the source
+      const userSource = connectingNodeRef.current
       let source = params.source!
       let target = params.target!
       let sourceHandle = params.sourceHandle
       let targetHandle = params.targetHandle
 
-      // If the connection was made from a target handle to a source handle,
-      // ReactFlow may have swapped them. We detect this by checking if the
-      // sourceHandle ID contains "target" — if so, we need to reverse.
-      if (sourceHandle && sourceHandle.includes('target')) {
-        // User started from a target handle — swap direction
-        const tmp = source
+      if (userSource && userSource !== source) {
+        // ReactFlow swapped source/target — reverse them back
+        const tmpNode = source
         source = target
-        target = tmp
+        target = tmpNode
         const tmpH = sourceHandle
         sourceHandle = targetHandle
         targetHandle = tmpH
       }
 
       const edge: Edge = {
-        id: `edge_${source}_${target}_${Date.now()}`,
+        id: `edge_${source}_${target}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         source,
         target,
         sourceHandle,
@@ -387,6 +395,8 @@ export default function SimulatorCanvas() {
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
+            onConnectStart={onConnectStart}
+            onConnectEnd={onConnectEnd}
             onSelectionChange={onSelectionChange}
             nodeTypes={nodeTypes}
             fitView

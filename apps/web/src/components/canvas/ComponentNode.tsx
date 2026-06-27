@@ -77,11 +77,9 @@ function ComponentNodeComponent(props: any) {
       }`}
       style={{ borderLeftColor: nodeColor, borderLeftWidth: 4 }}
     >
-      <Handle id="target-top" type="target" position={Position.Top} className="w-3 h-3 bg-accent border-2 border-surface" />
-      <Handle id="source-top" type="source" position={Position.Top} className="w-3 h-3 bg-accent border-2 border-surface" />
+      <Handle id="top" type="source" position={Position.Top} className="w-3 h-3 bg-accent border-2 border-surface" />
 
-      <Handle id="target-left" type="target" position={Position.Left} className="w-3 h-3 bg-accent border-2 border-surface" />
-      <Handle id="source-left" type="source" position={Position.Left} className="w-3 h-3 bg-accent border-2 border-surface" />
+      <Handle id="left" type="source" position={Position.Left} className="w-3 h-3 bg-accent border-2 border-surface" />
 
       {/* Header */}
       <div className="px-3 py-2 border-b border-border relative" onDoubleClick={handleDoubleClick}>
