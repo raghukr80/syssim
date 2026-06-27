@@ -21,7 +21,7 @@ export function EventLog() {
 
   // Initialize position on mount — place at bottom-left
   useEffect(() => {
-    setPosition({ x: 16, y: window.innerHeight - 300 })
+    setPosition({ x: 16, y: window.innerHeight - 280 })
   }, [])
 
   // Auto-scroll to bottom when new events arrive
@@ -56,8 +56,8 @@ export function EventLog() {
     const handleMouseMove = (e: MouseEvent) => {
       const dx = e.clientX - dragStart.current.mouseX
       const dy = e.clientY - dragStart.current.mouseY
-      const newX = Math.max(0, Math.min(dragStart.current.posX + dx, window.innerWidth - 400))
-      const newY = Math.max(0, Math.min(dragStart.current.posY + dy, window.innerHeight - 300))
+      const newX = Math.max(0, Math.min(dragStart.current.posX + dx, window.innerWidth - 380))
+      const newY = Math.max(0, Math.min(dragStart.current.posY + dy, window.innerHeight - 280))
       setPosition({ x: newX, y: newY })
     }
 
