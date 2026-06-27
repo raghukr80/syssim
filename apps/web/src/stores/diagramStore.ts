@@ -53,6 +53,10 @@ interface DiagramStore {
   deselectVersion: number
   theme: 'dark' | 'light'
   title: string
+  architectureNotes: string
+  traceMode: boolean
+  tracePath: string[]
+  traceEdgeNumbers: Record<string, number>
 
   // Actions
   setNodes: (nodes: SimNode[]) => void
@@ -100,6 +104,10 @@ interface DiagramStore {
   toggleChaos: () => void
   toggleTheme: () => void
   setTitle: (title: string) => void
+  setArchitectureNotes: (notes: string) => void
+  setTraceMode: (mode: boolean) => void
+  addTraceNode: (nodeId: string) => void
+  clearTrace: () => void
   deselectAll: () => void
   autoAlign: () => void
 
@@ -143,6 +151,10 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
   deselectVersion: 0,
   theme: 'dark' as const,
   title: 'Untitled Design',
+  architectureNotes: '',
+  traceMode: false,
+  tracePath: [],
+  traceEdgeNumbers: {},
 
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
@@ -418,6 +430,30 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
     localStorage.setItem('syssim-theme', newTheme)
   },
   setTitle: (title: string) => set({ title }),
+  setArchitectureNotes: (notes: string) => set({ architectureNotes: notes }),
+  setTraceMode: (mode: boolean) => set({ traceMode: mode, tracePath: mode ? [] : [], traceEdgeNumbers: mode ? {} : {} }),
+  addTraceNode: (nodeId) => {
+    const path = [...get().tracePath]
+    if (path.length === 0) {
+      path.push(nodeId)
+    } else {
+      const lastNode = path[path.length - 1]
+      if (nodeId === lastNode) return
+      const edge = get().edges.find((e: any) =>
+        (e.source === lastNode && e.target === nodeId) ||
+        (e.source === nodeId && e.target === lastNode)
+      )
+      if (!edge) return
+      path.push(nodeId)
+      // Update edge numbers
+      const numbers = { ...get().traceEdgeNumbers }
+      numbers[edge.id] = path.length - 1
+      set({ tracePath: path, traceEdgeNumbers: numbers })
+      return
+    }
+    set({ tracePath: path })
+  },
+  clearTrace: () => set({ tracePath: [], traceEdgeNumbers: {} }),
   deselectAll: () => set({ selectedNodeIds: [], selectedEdgeIds: [], deselectVersion: get().deselectVersion + 1 }),
 
   // ── Auto Align — arranges nodes in a grid layout ──

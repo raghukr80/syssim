@@ -15,6 +15,7 @@ import { MetricsPanel } from '../metrics/MetricsPanel'
 import { EventLog } from '../metrics/EventLog'
 import { ReportModal } from '../metrics/ReportModal'
 import { SimulationControls } from '../toolbar/SimulationControls'
+import { CanvasToolbar } from './CanvasToolbar'
 import { useLayoutZones, LayoutZonesRenderer } from './LayoutZones'
 
 const nodeTypes: NodeTypes = {
@@ -139,29 +140,43 @@ export default function SimulatorCanvas() {
     [onEdgesChangeRaw, syncToStore]
   )
 
+  // ── Trace mode: click nodes to build path ──
+  const isTraceMode = useDiagramStore(s => s.traceMode)
+  const tracePath = useDiagramStore(s => s.tracePath)
+  const traceEdgeNumbers = useDiagramStore(s => s.traceEdgeNumbers)
+  const addTraceNode = useDiagramStore(s => s.addTraceNode)
+  const clearTrace = useDiagramStore(s => s.clearTrace)
+
+  const onNodeClickHandler = useCallback((_e: React.MouseEvent, node: Node) => {
+    if (isTraceMode) {
+      addTraceNode(node.id)
+    }
+  }, [isTraceMode, addTraceNode])
+
   // ── Edge animated state ──
   useEffect(() => {
-    setEdges(currentEdges =>
-      currentEdges.map(e => {
+    setEdges((currentEdges: Edge[]) =>
+      currentEdges.map((e: Edge) => {
         const showArrow = (e.data as Record<string, unknown>)?.showArrow !== false
-        return {
-          ...e,
-          animated: store.simState === 'running',
-          style: {
-            ...e.style,
-            stroke: store.simState === 'running' ? 'var(--color-accent)' : 'var(--color-border)',
-            strokeWidth: store.simState === 'running' ? 2 : 1.5,
-          },
-          markerEnd: showArrow ? {
-            type: 'arrowclosed' as const,
-            color: store.simState === 'running' ? 'var(--color-accent)' : 'var(--color-border)',
-            width: 15,
-            height: 15,
-          } : undefined,
+        const traceNum = traceEdgeNumbers[e.id]
+        const isTraced = traceNum !== undefined
+        const style: Record<string, any> = {
+          ...((e.style as Record<string, any>) || {}),
+          stroke: isTraced ? 'var(--color-success)' : store.simState === 'running' ? 'var(--color-accent)' : 'var(--color-border)',
+          strokeWidth: isTraced ? 3 : store.simState === 'running' ? 2 : 1.5,
         }
+        const markerEnd = showArrow ? {
+          type: 'arrowclosed',
+          color: isTraced ? 'var(--color-success)' : store.simState === 'running' ? 'var(--color-accent)' : 'var(--color-border)',
+          width: isTraced ? 18 : 15,
+          height: isTraced ? 18 : 15,
+        } : undefined
+        const label = isTraced ? ` ${traceNum} ` : (e.data?.label || '')
+        const data: Record<string, any> = { ...e.data, label }
+        return { ...e, animated: store.simState === 'running' || isTraced, style, markerEnd, label, data } as Edge
       })
     )
-  }, [store.simState, setEdges])
+  }, [store.simState, setEdges, traceEdgeNumbers])
 
   // ── Selection sync ──
   const lastSelectionRef = useRef<{ ids: string[]; edgeIds: string[] }>({ ids: [], edgeIds: [] })
@@ -435,6 +450,7 @@ export default function SimulatorCanvas() {
             onConnectStart={onConnectStart}
             onConnectEnd={onConnectEnd}
             onEdgeDoubleClick={onEdgeDoubleClick}
+            onNodeClick={onNodeClickHandler}
             onSelectionChange={onSelectionChange}
             nodeTypes={nodeTypes}
             connectionMode={ConnectionMode.Loose}
@@ -492,6 +508,7 @@ export default function SimulatorCanvas() {
 
       <EventLog />
       <ReportModal />
+      <CanvasToolbar />
 
       {/* Inline edge label editor */}
       {editingEdgeId && (
