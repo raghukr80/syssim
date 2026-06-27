@@ -17,7 +17,7 @@ export function EventLog() {
   const autoScroll = useRef(true)
   const [position, setPosition] = useState({ x: 16, y: 16 })
   const [dragging, setDragging] = useState(false)
-  const dragOffset = useRef({ x: 0, y: 0 })
+  const dragStart = useRef({ mouseX: 0, mouseY: 0, posX: 0, posY: 0 })
 
   // Auto-scroll to bottom when new events arrive
   useEffect(() => {
@@ -33,13 +33,15 @@ export function EventLog() {
     }
   }
 
-  // Drag handlers
+  // Drag handlers — use bottom positioning with proper offset calculation
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button')) return
     setDragging(true)
-    dragOffset.current = {
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
+    dragStart.current = {
+      mouseX: e.clientX,
+      mouseY: e.clientY,
+      posX: position.x,
+      posY: position.y,
     }
   }, [position])
 
@@ -47,8 +49,11 @@ export function EventLog() {
     if (!dragging) return
 
     const handleMouseMove = (e: MouseEvent) => {
-      const newX = Math.max(0, Math.min(e.clientX - dragOffset.current.x, window.innerWidth - 400))
-      const newY = Math.max(0, Math.min(e.clientY - dragOffset.current.y, window.innerHeight - 300))
+      const dx = e.clientX - dragStart.current.mouseX
+      const dy = e.clientY - dragStart.current.mouseY
+      const newX = Math.max(0, Math.min(dragStart.current.posX + dx, window.innerWidth - 400))
+      // For bottom positioning: moving mouse UP (negative dy) should INCREASE bottom value
+      const newY = Math.max(0, Math.min(dragStart.current.posY - dy, window.innerHeight - 300))
       setPosition({ x: newX, y: newY })
     }
 
@@ -91,7 +96,7 @@ export function EventLog() {
       className="fixed z-20 w-[380px] max-h-[280px] bg-surface/95 border border-border rounded-lg shadow-2xl backdrop-blur-sm flex flex-col overflow-hidden"
       style={{
         left: `${position.x}px`,
-        top: `${position.y}px`,
+        bottom: `${position.y}px`,
       }}
     >
       {/* Header — drag handle */}
