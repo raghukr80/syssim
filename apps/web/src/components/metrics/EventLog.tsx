@@ -56,8 +56,8 @@ export function EventLog() {
     const handleMouseMove = (e: MouseEvent) => {
       const dx = e.clientX - dragStart.current.mouseX
       const dy = e.clientY - dragStart.current.mouseY
-      const newX = Math.max(0, Math.min(dragStart.current.posX + dx, window.innerWidth - 380))
-      const newY = Math.max(0, Math.min(dragStart.current.posY + dy, window.innerHeight - 280))
+      const newX = Math.max(0, Math.min(dragStart.current.posX + dx, window.innerWidth - 100))
+      const newY = Math.max(0, Math.min(dragStart.current.posY + dy, window.innerHeight - 40))
       setPosition({ x: newX, y: newY })
     }
 
