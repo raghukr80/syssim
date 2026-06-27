@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useDiagramStore } from '../../stores/diagramStore'
-import { AlertTriangle, AlertCircle, Info, ChevronDown, ChevronUp, X } from 'lucide-react'
+import { AlertTriangle, AlertCircle, Info, ChevronDown, ChevronUp, X, GripVertical } from 'lucide-react'
 
 const SEVERITY_CONFIG = {
   info: { icon: Info, color: 'text-info', bg: 'bg-info/10', border: 'border-info/20', badge: 'bg-info/20 text-info' },
@@ -15,6 +15,9 @@ export function EventLog() {
   const clearEvents = useDiagramStore(s => s.clearEvents)
   const scrollRef = useRef<HTMLDivElement>(null)
   const autoScroll = useRef(true)
+  const [position, setPosition] = useState({ x: 16, y: 16 })
+  const [dragging, setDragging] = useState(false)
+  const dragOffset = useRef({ x: 0, y: 0 })
 
   // Auto-scroll to bottom when new events arrive
   useEffect(() => {
@@ -29,6 +32,38 @@ export function EventLog() {
       autoScroll.current = scrollHeight - scrollTop - clientHeight < 40
     }
   }
+
+  // Drag handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return
+    setDragging(true)
+    dragOffset.current = {
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    }
+  }, [position])
+
+  useEffect(() => {
+    if (!dragging) return
+
+    const handleMouseMove = (e: MouseEvent) => {
+      setPosition({
+        x: Math.max(0, Math.min(e.clientX - dragOffset.current.x, window.innerWidth - 400)),
+        y: Math.max(0, Math.min(e.clientY - dragOffset.current.y, window.innerHeight - 300)),
+      })
+    }
+
+    const handleMouseUp = () => {
+      setDragging(false)
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [dragging])
 
   const recentEvents = events.slice(-50)
   const criticalCount = events.filter(e => e.severity === 'critical').length
@@ -53,10 +88,20 @@ export function EventLog() {
   }
 
   return (
-    <div className="absolute bottom-4 left-4 z-20 w-[380px] max-h-[280px] bg-surface/95 border border-border rounded-lg shadow-2xl backdrop-blur-sm flex flex-col overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-border shrink-0">
+    <div
+      className="fixed z-20 w-[380px] max-h-[280px] bg-surface/95 border border-border rounded-lg shadow-2xl backdrop-blur-sm flex flex-col overflow-hidden"
+      style={{
+        left: `${position.x}px`,
+        bottom: `${position.y}px`,
+      }}
+    >
+      {/* Header — drag handle */}
+      <div
+        className={`flex items-center justify-between px-3 py-2 border-b border-border shrink-0 select-none ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        onMouseDown={handleMouseDown}
+      >
         <div className="flex items-center gap-2">
+          <GripVertical className="w-3 h-3 text-text-dim" />
           <AlertCircle className="w-3.5 h-3.5 text-accent" />
           <span className="text-xs font-semibold text-text">Event Log</span>
           <span className="text-[9px] text-text-dim">{events.length} events</span>
