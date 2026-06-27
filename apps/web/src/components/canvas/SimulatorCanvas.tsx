@@ -1,4 +1,4 @@
-import { ReactFlow, Background, BackgroundVariant, Controls, useNodesState, useEdgesState, addEdge, type Node, type Edge, type OnConnect, type NodeTypes, Panel, type OnNodesChange, type OnEdgesChange, ConnectionMode } from '@xyflow/react'
+import { ReactFlow, Background, BackgroundVariant, useNodesState, useEdgesState, addEdge, type Node, type Edge, type OnConnect, type NodeTypes, Panel, type OnNodesChange, type OnEdgesChange, ConnectionMode, useReactFlow } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { useCallback, useRef, useEffect, useState } from 'react'
 import { useDiagramStore } from '../../stores/diagramStore'
@@ -14,8 +14,8 @@ import { StatusBar } from '../metrics/StatusBar'
 import { MetricsPanel } from '../metrics/MetricsPanel'
 import { EventLog } from '../metrics/EventLog'
 import { ReportModal } from '../metrics/ReportModal'
-import { SimulationControls } from '../toolbar/SimulationControls'
 import { CanvasToolbarButtons, TraceBreadcrumb, SuggestionsPanel, NotesPanel } from './CanvasToolbar'
+import { SimulationControls } from '../toolbar/SimulationControls'
 import { useLayoutZones, LayoutZonesRenderer } from './LayoutZones'
 
 const nodeTypes: NodeTypes = {
@@ -25,6 +25,43 @@ const nodeTypes: NodeTypes = {
 let rfIdCounter = 0
 function genRfId(): string {
   return `rf_${++rfIdCounter}`
+}
+
+
+// ─── Zoom Buttons (custom, non-absolute) ──
+function ZoomButtons() {
+  const { zoomIn, zoomOut, fitView } = useReactFlow()
+  return (
+    <div className="flex flex-col gap-0.5">
+      <button
+        onClick={() => zoomIn()}
+        className="p-1 rounded text-text-dim hover:text-text hover:bg-surface-hover transition-colors"
+        title="Zoom In"
+      >
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M11 8v6M8 11h6"/>
+        </svg>
+      </button>
+      <button
+        onClick={() => zoomOut()}
+        className="p-1 rounded text-text-dim hover:text-text hover:bg-surface-hover transition-colors"
+        title="Zoom Out"
+      >
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M8 11h6"/>
+        </svg>
+      </button>
+      <button
+        onClick={() => fitView()}
+        className="p-1 rounded text-text-dim hover:text-text hover:bg-surface-hover transition-colors"
+        title="Fit View"
+      >
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+        </svg>
+      </button>
+    </div>
+  )
 }
 
 export default function SimulatorCanvas() {
@@ -470,21 +507,20 @@ export default function SimulatorCanvas() {
             }}
           >
             <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="var(--color-border)" />
-            <Controls
-              position="bottom-right"
-              showZoom={true}
-              showFitView={true}
-              showInteractive={false}
-              className="!bg-surface !border !border-border !rounded-lg !shadow-lg [&>button]:!bg-surface [&>button]:!border-border [&>button]:!text-text [&>button:hover]:!bg-surface-hover"
-            />
-            <Panel position="bottom-right" className="!mb-14">
-              <div className="flex flex-col gap-1 bg-surface border border-border rounded-lg shadow-lg p-1">
-                <CanvasToolbarButtons
-                  onOpenSuggestions={() => setToolbarMode(toolbarMode === 'suggestions' ? null : 'suggestions')}
-                  onOpenNotes={() => setToolbarMode(toolbarMode === 'notes' ? null : 'notes')}
-                  isTraceActive={isTraceActive}
-                  onClearTrace={clearTrace}
-                />
+            <Panel position="bottom-right">
+              <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1 bg-surface border border-border rounded-lg shadow-lg p-1">
+                  <CanvasToolbarButtons
+                    onOpenSuggestions={() => setToolbarMode(toolbarMode === 'suggestions' ? null : 'suggestions')}
+                    onOpenNotes={() => setToolbarMode(toolbarMode === 'notes' ? null : 'notes')}
+                    isTraceActive={isTraceActive}
+                    onClearTrace={clearTrace}
+                    mode={toolbarMode as any}
+                  />
+                </div>
+                <div className="bg-surface border border-border rounded-lg shadow-lg flex flex-col items-center justify-center gap-0.5 p-1">
+                  <ZoomButtons />
+                </div>
               </div>
             </Panel>
             <Panel position="top-right">

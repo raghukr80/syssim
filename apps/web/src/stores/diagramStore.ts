@@ -115,6 +115,7 @@ interface DiagramStore {
   exportDiagram: () => string
   importDiagram: (json: string) => void
   clearDiagram: () => void
+  loadDiagram: (nodes: any[], edges: any[]) => void
   loadBlueprint: (nodes: SimNode[], edges: SimEdge[]) => void
 }
 
@@ -501,6 +502,10 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
   clearDiagram: () => {
     get().pushHistory()
     set({ nodes: [], edges: [], selectedNodeIds: [], selectedEdgeIds: [], clearVersion: get().clearVersion + 1 })
+  },
+  loadDiagram: (nodes, edges) => {
+    get().pushHistory()
+    set({ nodes, edges, selectedNodeIds: [], selectedEdgeIds: [] })
   },
 
   loadBlueprint: (bpNodes, bpEdges) => {

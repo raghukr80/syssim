@@ -1,48 +1,109 @@
 import { useState } from 'react'
 import { useDiagramStore } from '../../stores/diagramStore'
-import { Lightbulb, StickyNote, Route, X, ChevronRight, RotateCcw } from 'lucide-react'
+import { Lightbulb, StickyNote, Route, X, ChevronRight, RotateCcw, Wand2 } from 'lucide-react'
+import { AIDesignModal } from './AIDesign'
 
 type ToolbarMode = null | 'suggestions' | 'notes' | 'trace'
 
 // ─── Toolbar Buttons (for Controls panel) ──
-export function CanvasToolbarButtons({ onOpenSuggestions, onOpenNotes, isTraceActive, onClearTrace }: {
+export function CanvasToolbarButtons({ onOpenSuggestions, onOpenNotes, isTraceActive, onClearTrace, mode }: {
   onOpenSuggestions: () => void
   onOpenNotes: () => void
   isTraceActive: boolean
   onClearTrace: () => void
+  mode: ToolbarMode
 }) {
+  const store = useDiagramStore()
+  const [showAI, setShowAI] = useState(false)
+
   return (
-    <div className="flex flex-col gap-1">
-      <button
-        onClick={onOpenSuggestions}
-        className="p-1.5 rounded text-text-dim hover:text-text hover:bg-surface-hover transition-all"
-        title="Suggestions"
-      >
-        <Lightbulb className="w-3.5 h-3.5" />
-      </button>
-      <button
-        onClick={onOpenNotes}
-        className="p-1.5 rounded text-text-dim hover:text-text hover:bg-surface-hover transition-all"
-        title="Architecture Notes"
-      >
-        <StickyNote className="w-3.5 h-3.5" />
-      </button>
-      <button
-        className="p-1.5 rounded text-text-dim hover:text-text hover:bg-surface-hover transition-all"
-        title="Trace Request Flow"
-      >
-        <Route className="w-3.5 h-3.5" />
-      </button>
-      {isTraceActive && (
+    <>
+      <div className="flex flex-col gap-1">
         <button
-          onClick={onClearTrace}
-          className="p-1.5 rounded text-text-dim hover:text-error transition-all"
-          title="Clear Trace"
+          onClick={() => setShowAI(true)}
+          className="p-1.5 rounded text-text-dim hover:text-text hover:bg-surface-hover transition-all"
+          title="AI Design"
         >
-          <RotateCcw className="w-3.5 h-3.5" />
+          <Wand2 className="w-3.5 h-3.5" />
         </button>
+        <div className="w-full h-px bg-border" />
+        <button
+          onClick={onOpenSuggestions}
+          className={`p-1.5 rounded transition-all ${
+            mode === 'suggestions'
+              ? 'bg-accent text-white'
+              : 'text-text-dim hover:text-text hover:bg-surface-hover'
+          }`}
+          title="Suggestions"
+        >
+          <Lightbulb className="w-3.5 h-3.5" />
+        </button>
+        <button
+          onClick={onOpenNotes}
+          className={`p-1.5 rounded transition-all ${
+            mode === 'notes'
+              ? 'bg-accent text-white'
+              : 'text-text-dim hover:text-text hover:bg-surface-hover'
+          }`}
+          title="Architecture Notes"
+        >
+          <StickyNote className="w-3.5 h-3.5" />
+        </button>
+        <button
+          className="p-1.5 rounded text-text-dim hover:text-text hover:bg-surface-hover transition-all"
+          title="Trace Request Flow"
+        >
+          <Route className="w-3.5 h-3.5" />
+        </button>
+        {isTraceActive && (
+          <button
+            onClick={onClearTrace}
+            className="p-1.5 rounded text-text-dim hover:text-error transition-all"
+            title="Clear Trace"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+
+      {/* Trace breadcrumb at top */}
+      {isTraceActive && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 bg-surface/95 border border-border rounded-lg shadow-lg px-3 py-2 backdrop-blur-sm max-w-[80%] overflow-x-auto">
+          {store.tracePath.map((nodeId, i) => {
+            const node = store.nodes.find(n => n.id === nodeId)
+            const label = node?.data.label || nodeId
+            return (
+              <div key={i} className="flex items-center gap-1 shrink-0">
+                {i > 0 && (
+                  <span className="flex items-center justify-center w-4 h-4 rounded-full bg-accent text-white text-[8px] font-bold shrink-0">
+                    {i}
+                  </span>
+                )}
+                <span className={`text-[10px] font-medium ${i === 0 ? 'text-accent' : i === store.tracePath.length - 1 ? 'text-success' : 'text-text'}`}>
+                  {label}
+                </span>
+                {i < store.tracePath.length - 1 && (
+                  <ChevronRight className="w-3 h-3 text-text-dim shrink-0" />
+                )}
+              </div>
+            )
+          })}
+        </div>
       )}
-    </div>
+
+      {/* Suggestions panel */}
+      {mode === 'suggestions' && (
+        <SuggestionsPanel onClose={onOpenSuggestions} />
+      )}
+
+      {/* Notes panel */}
+      {mode === 'notes' && (
+        <NotesPanel onClose={onOpenNotes} />
+      )}
+
+      {/* AI Design Modal */}
+      {showAI && <AIDesignModal onClose={() => setShowAI(false)} />}
+    </>
   )
 }
 
