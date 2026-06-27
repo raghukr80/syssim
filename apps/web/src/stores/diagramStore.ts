@@ -52,6 +52,7 @@ interface DiagramStore {
   clearVersion: number
   deselectVersion: number
   theme: 'dark' | 'light'
+  title: string
 
   // Actions
   setNodes: (nodes: SimNode[]) => void
@@ -98,6 +99,7 @@ interface DiagramStore {
   toggleMetrics: () => void
   toggleChaos: () => void
   toggleTheme: () => void
+  setTitle: (title: string) => void
   deselectAll: () => void
   autoAlign: () => void
 
@@ -140,6 +142,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
   clearVersion: 0,
   deselectVersion: 0,
   theme: 'dark' as const,
+  title: 'Untitled Design',
 
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
@@ -407,15 +410,14 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
   toggleTheme: () => {
     const newTheme = get().theme === 'dark' ? 'light' : 'dark'
     set({ theme: newTheme })
-    // Apply/remove light class on root element
     if (newTheme === 'light') {
       document.documentElement.classList.add('light')
     } else {
       document.documentElement.classList.remove('light')
     }
-    // Persist preference
     localStorage.setItem('syssim-theme', newTheme)
   },
+  setTitle: (title: string) => set({ title }),
   deselectAll: () => set({ selectedNodeIds: [], selectedEdgeIds: [], deselectVersion: get().deselectVersion + 1 }),
 
   // ── Auto Align — arranges nodes in a grid layout ──

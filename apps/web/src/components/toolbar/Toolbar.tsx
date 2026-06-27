@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react'
 import { useDiagramStore } from '../../stores/diagramStore'
 import { Download, Upload, Undo2, Redo2, Activity, Eraser, LayoutGrid, FolderPlus } from 'lucide-react'
 import { BlueprintPanel } from './BlueprintPanel'
@@ -35,10 +36,12 @@ export function Toolbar({ onAddZone }: { onAddZone: () => void }) {
 
   return (
     <div className="h-11 bg-surface border-b border-border flex items-center px-3 gap-1 shrink-0">
-      {/* Logo */}
+      {/* Logo + Editable Title */}
       <div className="flex items-center gap-2 mr-4">
         <Activity className="w-4 h-4 text-accent" />
         <span className="text-sm font-semibold text-text">SysSim</span>
+        <span className="text-text-dim text-sm">·</span>
+        <EditableTitle />
       </div>
 
       <div className="w-px h-5 bg-border mx-1" />
@@ -127,5 +130,64 @@ export function Toolbar({ onAddZone }: { onAddZone: () => void }) {
         Metrics
       </button>
     </div>
+  )
+}
+
+// ─── Editable Title ──
+function EditableTitle() {
+  const title = useDiagramStore(s => s.title)
+  const setTitle = useDiagramStore(s => s.setTitle)
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(title)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    setDraft(title)
+  }, [title])
+
+  useEffect(() => {
+    if (editing && inputRef.current) {
+      inputRef.current.focus()
+      inputRef.current.select()
+    }
+  }, [editing])
+
+  const commit = () => {
+    const trimmed = draft.trim()
+    if (trimmed && trimmed !== title) {
+      setTitle(trimmed)
+      document.title = `SysSim — ${trimmed}`
+    } else {
+      setDraft(title)
+    }
+    setEditing(false)
+  }
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={e => {
+          if (e.key === 'Enter') commit()
+          if (e.key === 'Escape') { setDraft(title); setEditing(false) }
+        }}
+        className="text-sm text-text bg-transparent border-b border-accent outline-none px-0.5 py-0 w-48"
+        placeholder="Untitled design"
+        maxLength={60}
+      />
+    )
+  }
+
+  return (
+    <button
+      onClick={() => setEditing(true)}
+      className="text-sm text-text-dim hover:text-text transition-colors truncate max-w-[200px]"
+      title="Click to rename"
+    >
+      {title || 'Untitled design'}
+    </button>
   )
 }
