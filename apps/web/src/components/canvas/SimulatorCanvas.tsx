@@ -1,4 +1,4 @@
-import { ReactFlow, Background, BackgroundVariant, Controls, useNodesState, useEdgesState, addEdge, type Node, type Edge, type OnConnect, type NodeTypes, Panel, type OnNodesChange, type OnEdgesChange } from '@xyflow/react'
+import { ReactFlow, Background, BackgroundVariant, Controls, useNodesState, useEdgesState, addEdge, type Node, type Edge, type OnConnect, type NodeTypes, Panel, type OnNodesChange, type OnEdgesChange, ConnectionMode } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { useCallback, useRef, useEffect, useState } from 'react'
 import { useDiagramStore } from '../../stores/diagramStore'
@@ -399,6 +399,7 @@ export default function SimulatorCanvas() {
             onConnectEnd={onConnectEnd}
             onSelectionChange={onSelectionChange}
             nodeTypes={nodeTypes}
+            connectionMode={ConnectionMode.Loose}
             fitView
             minZoom={0.1}
             maxZoom={3}

@@ -148,11 +148,13 @@ function ComponentNodeComponent(props: any) {
         </div>
       )}
 
-      <Handle id="source-right" type="source" position={Position.Right} className="w-3 h-3 bg-accent border-2 border-surface" />
-      <Handle id="target-right" type="target" position={Position.Right} className="w-3 h-3 bg-accent border-2 border-surface" />
+      <Handle id="top" type="source" position={Position.Top} className="w-3 h-3 bg-accent border-2 border-surface" />
 
-      <Handle id="source-bottom" type="source" position={Position.Bottom} className="w-3 h-3 bg-accent border-2 border-surface" />
-      <Handle id="target-bottom" type="target" position={Position.Bottom} className="w-3 h-3 bg-accent border-2 border-surface" />
+      <Handle id="left" type="source" position={Position.Left} className="w-3 h-3 bg-accent border-2 border-surface" />
+
+      <Handle id="right" type="source" position={Position.Right} className="w-3 h-3 bg-accent border-2 border-surface" />
+
+      <Handle id="bottom" type="source" position={Position.Bottom} className="w-3 h-3 bg-accent border-2 border-surface" />
     </div>
   )
 }
