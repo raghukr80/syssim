@@ -47,10 +47,9 @@ export function EventLog() {
     if (!dragging) return
 
     const handleMouseMove = (e: MouseEvent) => {
-      setPosition({
-        x: Math.max(0, Math.min(e.clientX - dragOffset.current.x, window.innerWidth - 400)),
-        y: Math.max(0, Math.min(e.clientY - dragOffset.current.y, window.innerHeight - 300)),
-      })
+      const newX = Math.max(0, Math.min(e.clientX - dragOffset.current.x, window.innerWidth - 400))
+      const newY = Math.max(0, Math.min(e.clientY - dragOffset.current.y, window.innerHeight - 300))
+      setPosition({ x: newX, y: newY })
     }
 
     const handleMouseUp = () => {
@@ -73,7 +72,7 @@ export function EventLog() {
     return (
       <button
         onClick={() => setShowEventLog(true)}
-        className="absolute bottom-4 left-4 z-20 flex items-center gap-1.5 px-2.5 py-1.5 bg-surface/95 border border-border rounded-lg shadow-lg text-[10px] text-text-dim hover:text-text hover:border-accent/50 transition-colors backdrop-blur-sm"
+        className="fixed bottom-4 left-4 z-20 flex items-center gap-1.5 px-2.5 py-1.5 bg-surface/95 border border-border rounded-lg shadow-lg text-[10px] text-text-dim hover:text-text hover:border-accent/50 transition-colors backdrop-blur-sm"
       >
         <AlertCircle className="w-3 h-3" />
         Event Log
@@ -92,7 +91,7 @@ export function EventLog() {
       className="fixed z-20 w-[380px] max-h-[280px] bg-surface/95 border border-border rounded-lg shadow-2xl backdrop-blur-sm flex flex-col overflow-hidden"
       style={{
         left: `${position.x}px`,
-        bottom: `${position.y}px`,
+        top: `${position.y}px`,
       }}
     >
       {/* Header — drag handle */}
