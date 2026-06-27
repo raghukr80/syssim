@@ -15,7 +15,7 @@ import { MetricsPanel } from '../metrics/MetricsPanel'
 import { EventLog } from '../metrics/EventLog'
 import { ReportModal } from '../metrics/ReportModal'
 import { SimulationControls } from '../toolbar/SimulationControls'
-import { CanvasToolbar } from './CanvasToolbar'
+import { CanvasToolbarButtons } from './CanvasToolbar'
 import { useLayoutZones, LayoutZonesRenderer } from './LayoutZones'
 
 const nodeTypes: NodeTypes = {
@@ -472,7 +472,9 @@ export default function SimulatorCanvas() {
               showFitView={true}
               showInteractive={false}
               className="!bg-surface !border !border-border !rounded-lg !shadow-lg [&>button]:!bg-surface [&>button]:!border-border [&>button]:!text-text [&>button:hover]:!bg-surface-hover"
-            />
+            >
+              <CanvasToolbarButtons />
+            </Controls>
             <Panel position="top-right">
               <SimulationControls />
             </Panel>
@@ -508,7 +510,7 @@ export default function SimulatorCanvas() {
 
       <EventLog />
       <ReportModal />
-      <CanvasToolbar />
+      <CanvasToolbarButtons />
 
       {/* Inline edge label editor */}
       {editingEdgeId && (

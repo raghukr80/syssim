@@ -4,7 +4,8 @@ import { Lightbulb, StickyNote, Route, X, ChevronRight, RotateCcw } from 'lucide
 
 type ToolbarMode = null | 'suggestions' | 'notes' | 'trace'
 
-export function CanvasToolbar() {
+// ─── Toolbar Buttons (for Controls panel) ──
+export function CanvasToolbarButtons() {
   const store = useDiagramStore()
   const [mode, setMode] = useState<ToolbarMode>(null)
 
@@ -23,55 +24,54 @@ export function CanvasToolbar() {
 
   return (
     <>
-      {/* Floating toolbar — left side */}
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-2">
+      <div className="flex items-center gap-1">
         <button
           onClick={() => toggle('suggestions')}
-          className={`p-2 rounded-lg border shadow-lg transition-all ${
+          className={`p-1.5 rounded transition-all ${
             mode === 'suggestions'
-              ? 'bg-accent text-white border-accent'
-              : 'bg-surface border-border text-text-dim hover:text-text hover:border-accent/50'
+              ? 'bg-accent text-white'
+              : 'text-text-dim hover:text-text hover:bg-surface-hover'
           }`}
           title="Suggestions"
         >
-          <Lightbulb className="w-4 h-4" />
+          <Lightbulb className="w-3.5 h-3.5" />
         </button>
         <button
           onClick={() => toggle('notes')}
-          className={`p-2 rounded-lg border shadow-lg transition-all ${
+          className={`p-1.5 rounded transition-all ${
             mode === 'notes'
-              ? 'bg-accent text-white border-accent'
-              : 'bg-surface border-border text-text-dim hover:text-text hover:border-accent/50'
+              ? 'bg-accent text-white'
+              : 'text-text-dim hover:text-text hover:bg-surface-hover'
           }`}
           title="Architecture Notes"
         >
-          <StickyNote className="w-4 h-4" />
+          <StickyNote className="w-3.5 h-3.5" />
         </button>
         <button
           onClick={() => toggle('trace')}
-          className={`p-2 rounded-lg border shadow-lg transition-all ${
+          className={`p-1.5 rounded transition-all ${
             mode === 'trace'
-              ? 'bg-accent text-white border-accent'
-              : 'bg-surface border-border text-text-dim hover:text-text hover:border-accent/50'
+              ? 'bg-accent text-white'
+              : 'text-text-dim hover:text-text hover:bg-surface-hover'
           }`}
           title="Trace Request Flow"
         >
-          <Route className="w-4 h-4" />
+          <Route className="w-3.5 h-3.5" />
         </button>
         {isTraceActive && (
           <button
             onClick={() => store.clearTrace()}
-            className="p-2 rounded-lg border border-border bg-surface text-text-dim hover:text-error hover:border-error/50 shadow-lg transition-all"
+            className="p-1.5 rounded text-text-dim hover:text-error transition-all"
             title="Clear Trace"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-3.5 h-3.5" />
           </button>
         )}
       </div>
 
       {/* Trace breadcrumb at top */}
       {isTraceActive && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 bg-surface/95 border border-border rounded-lg shadow-lg px-3 py-2 backdrop-blur-sm max-w-[80%] overflow-x-auto">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 bg-surface/95 border border-border rounded-lg shadow-lg px-3 py-2 backdrop-blur-sm max-w-[80%] overflow-x-auto">
           {store.tracePath.map((nodeId, i) => {
             const node = store.nodes.find(n => n.id === nodeId)
             const label = node?.data.label || nodeId
@@ -107,7 +107,7 @@ export function CanvasToolbar() {
   )
 }
 
-// ── Suggestions Panel ──
+// ─── Suggestions Panel ──
 function SuggestionsPanel({ onClose }: { onClose: () => void }) {
   const store = useDiagramStore()
   const nodes = store.nodes
@@ -116,7 +116,7 @@ function SuggestionsPanel({ onClose }: { onClose: () => void }) {
   const suggestions = generateSuggestions(nodes, edges)
 
   return (
-    <div className="absolute left-16 top-1/2 -translate-y-1/2 z-30 w-72 bg-surface border border-border rounded-lg shadow-2xl overflow-hidden">
+    <div className="absolute right-0 top-full mt-1 z-30 w-72 bg-surface border border-border rounded-lg shadow-2xl overflow-hidden">
       <div className="flex items-center justify-between px-3 py-2 border-b border-border">
         <div className="flex items-center gap-2">
           <Lightbulb className="w-3.5 h-3.5 text-accent" />
@@ -146,7 +146,7 @@ function SuggestionsPanel({ onClose }: { onClose: () => void }) {
   )
 }
 
-// ── Notes Panel ──
+// ─── Notes Panel ──
 function NotesPanel({ onClose }: { onClose: () => void }) {
   const store = useDiagramStore()
   const [notes, setNotes] = useState(store.architectureNotes || '')
@@ -159,7 +159,7 @@ function NotesPanel({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="absolute left-16 top-1/2 -translate-y-1/2 z-30 w-72 bg-surface border border-border rounded-lg shadow-2xl overflow-hidden">
+    <div className="absolute right-0 top-full mt-1 z-30 w-72 bg-surface border border-border rounded-lg shadow-2xl overflow-hidden">
       <div className="flex items-center justify-between px-3 py-2 border-b border-border">
         <div className="flex items-center gap-2">
           <StickyNote className="w-3.5 h-3.5 text-accent" />
@@ -187,7 +187,7 @@ function NotesPanel({ onClose }: { onClose: () => void }) {
   )
 }
 
-// ── Suggestion Generator ──
+// ─── Suggestion Generator ──
 function generateSuggestions(nodes: any[], edges: any[]) {
   const suggestions: { title: string; message: string; severity: 'info' | 'warning' | 'error' }[] = []
 
