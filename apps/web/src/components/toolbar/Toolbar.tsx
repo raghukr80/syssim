@@ -11,13 +11,17 @@ export function Toolbar({ onAddZone }: { onAddZone: () => void }) {
   const [showExportMenu, setShowExportMenu] = useState(false)
 
   // Close dropdown when clicking outside
+  const exportMenuRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!showExportMenu) return
     const handler = (e: MouseEvent) => {
-      setShowExportMenu(false)
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setShowExportMenu(false)
+      }
     }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    // Use click event instead of mousedown to allow dropdown buttons to fire
+    document.addEventListener('click', handler)
+    return () => document.removeEventListener('click', handler)
   }, [showExportMenu])
 
   const getCanvasElement = () => {
@@ -115,7 +119,7 @@ export function Toolbar({ onAddZone }: { onAddZone: () => void }) {
       <button onClick={handleImport} className="p-1.5 rounded hover:bg-surface-hover text-text-dim hover:text-text transition-colors" title="Import">
         <Upload className="w-4 h-4" />
       </button>
-      <div className="relative">
+      <div className="relative" ref={exportMenuRef}>
         <button
           onClick={() => setShowExportMenu(!showExportMenu)}
           className="p-1.5 rounded hover:bg-surface-hover text-text-dim hover:text-text transition-colors"
