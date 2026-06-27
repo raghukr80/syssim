@@ -1,11 +1,28 @@
 import { useState, useRef, useEffect } from 'react'
 import { useDiagramStore } from '../../stores/diagramStore'
-import { Download, Upload, Undo2, Redo2, Activity, Eraser, LayoutGrid, FolderPlus } from 'lucide-react'
+import { Download, Upload, Undo2, Redo2, Activity, Eraser, LayoutGrid, FolderPlus, FileJson, FileImage, FileText } from 'lucide-react'
 import { BlueprintPanel } from './BlueprintPanel'
 import { CostPanel } from './CostPanel'
+import { toPng } from 'html-to-image'
+import { jsPDF } from 'jspdf'
 
 export function Toolbar({ onAddZone }: { onAddZone: () => void }) {
   const store = useDiagramStore()
+  const [showExportMenu, setShowExportMenu] = useState(false)
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    if (!showExportMenu) return
+    const handler = (e: MouseEvent) => {
+      setShowExportMenu(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showExportMenu])
+
+  const getCanvasElement = () => {
+    return document.querySelector('.react-flow') as HTMLElement | null
+  }
 
   const handleExport = () => {
     const json = store.exportDiagram()
@@ -16,6 +33,49 @@ export function Toolbar({ onAddZone }: { onAddZone: () => void }) {
     a.download = 'syssim-diagram.json'
     a.click()
     URL.revokeObjectURL(url)
+  }
+
+  const handleExportPNG = async () => {
+    const el = getCanvasElement()
+    if (!el) return
+    try {
+      const dataUrl = await toPng(el, {
+        backgroundColor: 'var(--color-bg)',
+        quality: 1,
+        pixelRatio: 2,
+      })
+      const a = document.createElement('a')
+      a.href = dataUrl
+      a.download = 'syssim-diagram.png'
+      a.click()
+    } catch (err) {
+      console.error('PNG export failed:', err)
+    }
+  }
+
+  const handleExportPDF = async () => {
+    const el = getCanvasElement()
+    if (!el) return
+    try {
+      const dataUrl = await toPng(el, {
+        backgroundColor: 'var(--color-bg)',
+        quality: 1,
+        pixelRatio: 2,
+      })
+      const img = new Image()
+      img.src = dataUrl
+      await new Promise(resolve => { img.onload = resolve })
+
+      const pdf = new jsPDF({
+        orientation: img.width > img.height ? 'landscape' : 'portrait',
+        unit: 'px',
+        format: [img.width, img.height],
+      })
+      pdf.addImage(dataUrl, 'PNG', 0, 0, img.width, img.height)
+      pdf.save('syssim-diagram.pdf')
+    } catch (err) {
+      console.error('PDF export failed:', err)
+    }
   }
 
   const handleImport = () => {
@@ -55,9 +115,37 @@ export function Toolbar({ onAddZone }: { onAddZone: () => void }) {
       <button onClick={handleImport} className="p-1.5 rounded hover:bg-surface-hover text-text-dim hover:text-text transition-colors" title="Import">
         <Upload className="w-4 h-4" />
       </button>
-      <button onClick={handleExport} className="p-1.5 rounded hover:bg-surface-hover text-text-dim hover:text-text transition-colors" title="Export">
-        <Download className="w-4 h-4" />
-      </button>
+      <div className="relative">
+        <button
+          onClick={() => setShowExportMenu(!showExportMenu)}
+          className="p-1.5 rounded hover:bg-surface-hover text-text-dim hover:text-text transition-colors"
+          title="Export"
+        >
+          <Download className="w-4 h-4" />
+        </button>
+        {showExportMenu && (
+          <div className="absolute top-full left-0 mt-1 bg-surface border border-border rounded-lg shadow-xl z-50 py-1 min-w-[140px]">
+            <button
+              onClick={() => { handleExport(); setShowExportMenu(false) }}
+              className="w-full flex items-center gap-2 px-3 py-1.5 text-[10px] text-text hover:bg-surface-hover transition-colors"
+            >
+              <FileJson className="w-3.5 h-3.5" /> Export JSON
+            </button>
+            <button
+              onClick={() => { handleExportPNG(); setShowExportMenu(false) }}
+              className="w-full flex items-center gap-2 px-3 py-1.5 text-[10px] text-text hover:bg-surface-hover transition-colors"
+            >
+              <FileImage className="w-3.5 h-3.5" /> Export PNG
+            </button>
+            <button
+              onClick={() => { handleExportPDF(); setShowExportMenu(false) }}
+              className="w-full flex items-center gap-2 px-3 py-1.5 text-[10px] text-text hover:bg-surface-hover transition-colors"
+            >
+              <FileText className="w-3.5 h-3.5" /> Export PDF
+            </button>
+          </div>
+        )}
+      </div>
 
       <div className="w-px h-5 bg-border mx-1" />
 

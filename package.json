@@ -10,5 +10,9 @@
     "build": "npm run build --workspace=web",
     "build:wasm": "npm run build --workspace=sim-engine",
     "build:all": "npm run build:wasm && npm run build"
+  },
+  "dependencies": {
+    "html-to-image": "^1.11.13",
+    "jspdf": "^4.2.1"
   }
 }
