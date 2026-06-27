@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useDiagramStore } from '../../stores/diagramStore'
-import { Zap, X, Clock, AlertTriangle, ChevronRight, Check } from 'lucide-react'
+import { Zap, X, Clock, AlertTriangle, ChevronRight, Check, ChevronDown, Globe, Server, Activity, Database, Code, Link } from 'lucide-react'
 import type { ChaosScenario, ChaosCategory, ComponentType } from '../../types'
 
 // ─── Chaos Scenario Definitions ──────────────────────────────────
@@ -15,61 +15,88 @@ const CHAOS_SCENARIOS: ChaosDefinition[] = [
   { id: 'packet-loss', name: 'Packet Loss', category: 'network', icon: '📉', description: '10% packet loss causing retransmissions and timeouts', targetTypes: ['load_balancer', 'api_gateway', 'web_server', 'serverless', 'container_cluster', 'database', 'cache', 'third_party_api'], failureRate: 0.10 },
   { id: 'bandwidth-limit', name: 'Bandwidth Limit', category: 'network', icon: '🚦', description: 'Throttle bandwidth to 10 Mbps', targetTypes: ['load_balancer', 'cdn', 'storage', 'message_queue', 'event_bus'], bandwidthLimitMbps: 10 },
   { id: 'dns-failure', name: 'DNS Failure', category: 'network', icon: '🔌', description: 'DNS resolution fails 50% of the time', targetTypes: ['dns'], failureRate: 0.5 },
+  { id: 'connection-timeout', name: 'Connection Timeout', category: 'network', icon: '⏳', description: 'All connections timeout after 30s', targetTypes: ['load_balancer', 'api_gateway', 'database', 'cache', 'third_party_api'], failureRate: 0.4 },
 
   // Infrastructure
   { id: 'instance-failure', name: 'Instance Failure', category: 'infrastructure', icon: '💀', description: 'Kill all requests — 100% failure rate', targetTypes: ['web_server', 'serverless', 'container_cluster', 'load_balancer', 'api_gateway'], failureRate: 1.0 },
   { id: 'cpu-spike', name: 'CPU Saturation', category: 'infrastructure', icon: '🔥', description: 'CPU spike causes 5x latency increase', targetTypes: ['web_server', 'container_cluster', 'database', 'serverless'], cpuSpike: 5 },
   { id: 'memory-pressure', name: 'Memory Pressure', category: 'infrastructure', icon: '🧠', description: 'Memory exhaustion triggers OOM and degraded performance', targetTypes: ['web_server', 'container_cluster', 'database', 'cache'], memoryPressure: 0.9 },
   { id: 'disk-full', name: 'Disk Full', category: 'infrastructure', icon: '💾', description: 'Storage full — writes fail, reads slow', targetTypes: ['database', 'storage'], failureRate: 0.3 },
+  { id: 'az-outage', name: 'AZ Outage', category: 'infrastructure', icon: '🏢', description: 'Entire availability zone goes down', targetTypes: ['web_server', 'container_cluster', 'database', 'cache', 'load_balancer'], failureRate: 1.0 },
 
   // Traffic
   { id: 'traffic-surge', name: 'Traffic Surge', category: 'traffic', icon: '🌊', description: '10x normal traffic spike', targetTypes: ['load_balancer', 'api_gateway', 'web_server', 'serverless', 'container_cluster'] },
   { id: 'thundering-herd', name: 'Thundering Herd', category: 'traffic', icon: '🦬', description: 'Simultaneous cache expiry causes DB overload', targetTypes: ['cache', 'database'] },
   { id: 'connection-exhaustion', name: 'Connection Pool Exhaustion', category: 'traffic', icon: '🔗', description: 'All connections consumed, new requests queued', targetTypes: ['database', 'web_server', 'container_cluster', 'third_party_api'], failureRate: 0.15 },
+  { id: 'ddos-attack', name: 'DDoS Attack', category: 'traffic', icon: '🚨', description: 'Volumetric DDoS saturates inbound bandwidth', targetTypes: ['load_balancer', 'api_gateway', 'waf', 'cdn'], failureRate: 0.8 },
 
-  // Data
+  // Data Layer
   { id: 'data-corruption', name: 'Data Corruption', category: 'data', icon: '☢️', description: '5% of reads return corrupted data', targetTypes: ['database', 'cache', 'storage'], failureRate: 0.05 },
   { id: 'replication-lag', name: 'Replication Lag', category: 'data', icon: '⏱️', description: 'Replica lags 5s behind primary — stale reads', targetTypes: ['database'], latencyInjection: { delayMs: 5000, jitterMs: 1000 } },
   { id: 'cache-poisoning', name: 'Cache Poisoning', category: 'data', icon: '☠️', description: 'Invalid data injected into cache — all hits return bad data', targetTypes: ['cache'], failureRate: 0.3 },
+  { id: 'db-deadlock', name: 'Database Deadlock', category: 'data', icon: '🔒', description: 'Deadlocks cause query timeouts and rollbacks', targetTypes: ['database'], failureRate: 0.25 },
+  { id: 'data-loss', name: 'Data Loss', category: 'data', icon: '🗑️', description: 'Partial data loss — recent writes unrecoverable', targetTypes: ['database', 'storage'], failureRate: 0.1 },
 
   // Application
   { id: 'deployment-bug', name: 'Bad Deployment', category: 'application', icon: '🐛', description: 'New deploy causes 5xx errors on 20% of requests', targetTypes: ['web_server', 'serverless', 'container_cluster', 'api_gateway'], failureRate: 0.2 },
   { id: 'config-error', name: 'Config Misconfiguration', category: 'application', icon: '⚙️', description: 'Wrong config causes all requests to fail', targetTypes: ['web_server', 'serverless', 'container_cluster', 'load_balancer', 'api_gateway'], failureRate: 1.0 },
   { id: 'memory-leak', name: 'Memory Leak', category: 'application', icon: '💧', description: 'Gradual memory leak degrades performance over time', targetTypes: ['web_server', 'container_cluster', 'database', 'cache', 'serverless'], memoryPressure: 0.7 },
+  { id: 'api-rate-limit', name: 'API Rate Limit Hit', category: 'application', icon: '🚫', description: 'API rate limiting returns 429 errors', targetTypes: ['api_gateway', 'load_balancer', 'web_server', 'serverless'], failureRate: 0.5 },
 
-  // Dependencies
+  // Dependency
   { id: 'third-party-down', name: 'Third-Party Down', category: 'dependency', icon: '🔴', description: 'External API completely unreachable', targetTypes: ['third_party_api'], failureRate: 1.0 },
   { id: 'third-party-slow', name: 'Third-Party Degraded', category: 'dependency', icon: '🐌', description: 'External API responds with 1s+ latency', targetTypes: ['third_party_api'], latencyInjection: { delayMs: 1000, jitterMs: 500 } },
   { id: 'certificate-expired', name: 'Certificate Expired', category: 'dependency', icon: '📜', description: 'TLS certificate expired — all HTTPS connections fail', targetTypes: ['load_balancer', 'api_gateway', 'cdn', 'waf'], failureRate: 0.5 },
+  { id: 'dns-poisoning', name: 'DNS Poisoning', category: 'dependency', icon: '🎭', description: 'DNS cache poisoning redirects traffic', targetTypes: ['dns'], failureRate: 0.6 },
 ]
 
-const CATEGORY_LABELS: Record<ChaosCategory, string> = {
-  network: 'Network',
-  infrastructure: 'Infrastructure',
-  traffic: 'Traffic',
-  data: 'Data',
-  application: 'Application',
-  dependency: 'Dependencies',
-}
-
-const CATEGORY_COLORS: Record<ChaosCategory, string> = {
-  network: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
-  infrastructure: 'text-orange-400 bg-orange-400/10 border-orange-400/20',
-  traffic: 'text-cyan-400 bg-cyan-400/10 border-cyan-400/20',
-  data: 'text-purple-400 bg-purple-400/10 border-purple-400/20',
-  application: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20',
-  dependency: 'text-red-400 bg-red-400/10 border-red-400/20',
+const CATEGORY_CONFIG: Record<ChaosCategory, { label: string; icon: React.ReactNode; color: string; description: string }> = {
+  network: {
+    label: 'Network',
+    icon: <Globe className="w-4 h-4" />,
+    color: 'text-blue-400 bg-blue-400/10 border-blue-400/30',
+    description: 'Latency, packet loss, bandwidth, DNS failures',
+  },
+  infrastructure: {
+    label: 'Infrastructure',
+    icon: <Server className="w-4 h-4" />,
+    color: 'text-orange-400 bg-orange-400/10 border-orange-400/30',
+    description: 'Instance failures, CPU, memory, disk, AZ outages',
+  },
+  traffic: {
+    label: 'Traffic',
+    icon: <Activity className="w-4 h-4" />,
+    color: 'text-cyan-400 bg-cyan-400/10 border-cyan-400/30',
+    description: 'Surges, thundering herd, connection exhaustion, DDoS',
+  },
+  data: {
+    label: 'Data Layer',
+    icon: <Database className="w-4 h-4" />,
+    color: 'text-purple-400 bg-purple-400/10 border-purple-400/30',
+    description: 'Corruption, replication lag, deadlocks, data loss',
+  },
+  application: {
+    label: 'Application',
+    icon: <Code className="w-4 h-4" />,
+    color: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/30',
+    description: 'Bad deploys, config errors, memory leaks, rate limits',
+  },
+  dependency: {
+    label: 'Dependency',
+    icon: <Link className="w-4 h-4" />,
+    color: 'text-red-400 bg-red-400/10 border-red-400/30',
+    description: 'Third-party outages, certificate expiry, DNS poisoning',
+  },
 }
 
 export function ChaosPanel() {
   const store = useDiagramStore()
   const [open, setOpen] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState<ChaosCategory | 'all'>('all')
+  const [expandedCategory, setExpandedCategory] = useState<ChaosCategory | null>(null)
   const [injectingId, setInjectingId] = useState<string | null>(null)
   const [targetSelector, setTargetSelector] = useState<{ scenario: ChaosDefinition; compatible: any[] } | null>(null)
 
-  const categories = Array.from(new Set(CHAOS_SCENARIOS.map(s => s.category)))
-  const filtered = selectedCategory === 'all' ? CHAOS_SCENARIOS : CHAOS_SCENARIOS.filter(s => s.category === selectedCategory)
+  const categories = Object.keys(CATEGORY_CONFIG) as ChaosCategory[]
 
   const getCompatibleNodes = (scenario: ChaosDefinition) => {
     return store.nodes.filter(n => scenario.targetTypes.includes(n.data.componentType))
@@ -77,14 +104,12 @@ export function ChaosPanel() {
 
   const handleInjectClick = (scenario: ChaosDefinition) => {
     const compatible = getCompatibleNodes(scenario)
-    console.log('[Chaos] handleInjectClick', scenario.name, 'compatible:', compatible.length)
     if (compatible.length === 0) return
     if (compatible.length === 1) {
       store.injectChaos({ ...scenario } as ChaosScenario, compatible[0].id)
       setInjectingId(scenario.id)
       setTimeout(() => setInjectingId(null), 1000)
     } else {
-      // Initialize selection state and show selector
       compatible.forEach((n: any) => { n._selected = true })
       setTargetSelector({ scenario, compatible: [...compatible] })
     }
@@ -100,6 +125,10 @@ export function ChaosPanel() {
   }
 
   const activeCount = store.activeChaos.length
+
+  const toggleCategory = (cat: ChaosCategory) => {
+    setExpandedCategory(expandedCategory === cat ? null : cat)
+  }
 
   return (
     <>
@@ -125,7 +154,7 @@ export function ChaosPanel() {
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => { if (!targetSelector) setOpen(false) }}>
           <div
-            className="bg-surface border border-border rounded-xl shadow-2xl w-[720px] max-h-[80vh] overflow-hidden flex flex-col"
+            className="bg-surface border border-border rounded-xl shadow-2xl w-[780px] max-h-[85vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
@@ -145,7 +174,7 @@ export function ChaosPanel() {
             {store.activeChaos.length > 0 && (
               <div className="px-5 py-3 border-b border-border bg-error/5 shrink-0">
                 <div className="text-[10px] font-semibold text-error uppercase tracking-widest mb-2">Active Chaos ({store.activeChaos.length})</div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
                   {store.activeChaos.map((ac, i) => {
                     const node = store.nodes.find(n => n.id === ac.targetNodeId)
                     return (
@@ -173,83 +202,101 @@ export function ChaosPanel() {
               </div>
             )}
 
-            {/* Category filter */}
-            <div className="px-5 py-3 border-b border-border shrink-0">
-              <div className="flex gap-1.5 flex-wrap">
-                <button
-                  onClick={() => setSelectedCategory('all')}
-                  className={`px-2.5 py-1 rounded text-[10px] font-medium transition-colors ${
-                    selectedCategory === 'all' ? 'bg-accent text-white' : 'text-text-dim hover:text-text hover:bg-surface-hover'
-                  }`}
-                >
-                  All
-                </button>
-                {categories.map(cat => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`px-2.5 py-1 rounded text-[10px] font-medium transition-colors border ${
-                      selectedCategory === cat ? CATEGORY_COLORS[cat] : 'text-text-dim hover:text-text hover:bg-surface-hover border-transparent'
-                    }`}
-                  >
-                    {CATEGORY_LABELS[cat]}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Scenario list */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-2">
-              {filtered.map((scenario) => {
-                const compatible = getCompatibleNodes(scenario)
-                const isActive = store.activeChaos.some(ac => ac.scenario.id === scenario.id)
-                const isInjecting = injectingId === scenario.id
+            {/* Category sections */}
+            <div className="flex-1 overflow-y-auto">
+              {categories.map(cat => {
+                const config = CATEGORY_CONFIG[cat]
+                const scenarios = CHAOS_SCENARIOS.filter(s => s.category === cat)
+                const isExpanded = expandedCategory === cat
+                const hasActive = store.activeChaos.some(ac => ac.scenario.category === cat)
 
                 return (
-                  <div
-                    key={scenario.id}
-                    className={`p-3 rounded-lg border transition-all ${
-                      isActive
-                        ? 'border-error/40 bg-error/5'
-                        : 'border-border hover:border-accent/30 bg-bg/30'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-base">{scenario.icon}</span>
-                          <span className="text-xs font-medium text-text">{scenario.name}</span>
-                          {isActive && (
-                            <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-error/20 text-error uppercase tracking-wider">Active</span>
-                          )}
-                        </div>
-                        <p className="text-[10px] text-text-dim leading-relaxed">{scenario.description}</p>
-                        <div className="text-[9px] text-text-dim mt-1">
-                          {compatible.length} compatible node{compatible.length !== 1 ? 's' : ''} on canvas
-                        </div>
+                  <div key={cat} className="border-b border-border last:border-b-0">
+                    {/* Category header */}
+                    <button
+                      onClick={() => toggleCategory(cat)}
+                      className={`w-full flex items-center gap-3 px-5 py-3 text-left transition-colors hover:bg-surface-hover ${
+                        hasActive ? 'bg-error/5' : ''
+                      }`}
+                    >
+                      <div className={`p-1.5 rounded border ${config.color}`}>
+                        {config.icon}
                       </div>
-                      <button
-                        onClick={() => handleInjectClick(scenario)}
-                        disabled={compatible.length === 0 || isInjecting}
-                        className={`shrink-0 flex items-center gap-1 px-3 py-1.5 rounded text-[10px] font-semibold transition-all ${
-                          isInjecting
-                            ? 'bg-error/30 text-error animate-pulse'
-                            : compatible.length === 0
-                            ? 'bg-bg text-text-dim cursor-not-allowed'
-                            : isActive
-                            ? 'bg-error/20 text-error hover:bg-error/30 border border-error/30'
-                            : 'bg-error/10 text-error hover:bg-error/20 border border-error/20'
-                        }`}
-                      >
-                        {isInjecting ? (
-                          <><Clock className="w-3 h-3 animate-spin" /> Injecting...</>
-                        ) : compatible.length === 1 ? (
-                          <><Zap className="w-3 h-3" /> Inject</>
-                        ) : (
-                          <><Zap className="w-3 h-3" /> Select Targets</>
-                        )}
-                      </button>
-                    </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-text">{config.label}</span>
+                          {hasActive && (
+                            <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-error/20 text-error uppercase">
+                              {store.activeChaos.filter(ac => ac.scenario.category === cat).length} active
+                            </span>
+                          )}
+                          <span className="text-[10px] text-text-dim">
+                            {scenarios.length} scenarios
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-text-dim mt-0.5">{config.description}</p>
+                      </div>
+                      <ChevronDown className={`w-4 h-4 text-text-dim transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {/* Scenario list (collapsible) */}
+                    {isExpanded && (
+                      <div className="px-5 pb-3 space-y-2">
+                        {scenarios.map((scenario) => {
+                          const compatible = getCompatibleNodes(scenario)
+                          const isActive = store.activeChaos.some(ac => ac.scenario.id === scenario.id)
+                          const isInjecting = injectingId === scenario.id
+
+                          return (
+                            <div
+                              key={scenario.id}
+                              className={`p-3 rounded-lg border transition-all ${
+                                isActive
+                                  ? 'border-error/40 bg-error/5'
+                                  : 'border-border hover:border-accent/30 bg-bg/30'
+                              }`}
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="text-base">{scenario.icon}</span>
+                                    <span className="text-xs font-medium text-text">{scenario.name}</span>
+                                    {isActive && (
+                                      <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-error/20 text-error uppercase tracking-wider">Active</span>
+                                    )}
+                                  </div>
+                                  <p className="text-[10px] text-text-dim leading-relaxed">{scenario.description}</p>
+                                  <div className="text-[9px] text-text-dim mt-1">
+                                    {compatible.length} compatible node{compatible.length !== 1 ? 's' : ''} on canvas
+                                  </div>
+                                </div>
+                                <button
+                                  onClick={() => handleInjectClick(scenario)}
+                                  disabled={compatible.length === 0 || isInjecting}
+                                  className={`shrink-0 flex items-center gap-1 px-3 py-1.5 rounded text-[10px] font-semibold transition-all ${
+                                    isInjecting
+                                      ? 'bg-error/30 text-error animate-pulse'
+                                      : compatible.length === 0
+                                      ? 'bg-bg text-text-dim cursor-not-allowed'
+                                      : isActive
+                                      ? 'bg-error/20 text-error hover:bg-error/30 border border-error/30'
+                                      : 'bg-error/10 text-error hover:bg-error/20 border border-error/20'
+                                  }`}
+                                >
+                                  {isInjecting ? (
+                                    <><Clock className="w-3 h-3 animate-spin" /> Injecting...</>
+                                  ) : compatible.length === 1 ? (
+                                    <><Zap className="w-3 h-3" /> Inject</>
+                                  ) : (
+                                    <><Zap className="w-3 h-3" /> Select Targets</>
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
                   </div>
                 )
               })}
