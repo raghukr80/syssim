@@ -15,6 +15,9 @@ export type ComponentType =
   | 'nat_gateway'
   | 'service_mesh'
   | 'api_management'
+  | 'sidecar_proxy'
+  | 'rate_limiter'
+  | 'circuit_breaker'
 
   // Compute
   | 'web_server'
@@ -100,9 +103,31 @@ export interface ComponentConfig {
   deliveryGuarantee?: 'at-most-once' | 'at-least-once' | 'exactly-once'
 
   // Load Balancer-specific
-  algorithm?: 'round-robin' | 'least-connections' | 'ip-hash' | 'weighted'
+  lbAlgorithm?: 'round-robin' | 'least-connections' | 'ip-hash' | 'weighted'
+  algorithm?: 'round-robin' | 'least-connections' | 'ip-hash' | 'weighted'  // alias for backwards compat
   healthCheckInterval?: number    // seconds
   sslTermination?: boolean        // SSL offloading
+
+  // Sidecar Proxy-specific
+  proxyMode?: 'sidecar' | 'gateway' | 'ingress'  // Deployment mode
+  protocol?: 'http' | 'grpc' | 'tcp' | 'http2'  // Supported protocols
+  mtlsEnabled?: boolean           // Mutual TLS enabled
+  trafficSplit?: Record<string, number>  // Canary deployments
+
+  // Rate Limiter-specific
+  rlAlgorithm?: 'token-bucket' | 'leaky-bucket' | 'fixed-window' | 'sliding-window' | 'sliding-log'
+  rateLimitRps?: number           // Requests per second limit
+  burstLimit?: number             // Burst allowance
+  keyType?: 'ip' | 'user' | 'header' | 'custom'  // Rate limit key
+  scope?: 'global' | 'per-instance' | 'per-route'  // Rate limit scope
+
+  // Circuit Breaker-specific
+  failureThreshold?: number       // Failure % to trip (0-100)
+  successThreshold?: number       // Successes to close (after half-open)
+  cbTimeout?: number              // Open state duration (ms)
+  timeout?: number                // Request timeout in ms (alias for backwards compat)
+  halfOpenRequests?: number       // Requests allowed in half-open state
+  monitoredEndpoints?: string[]   // Specific endpoints to monitor
 
   // Compute-specific
   autoScale?: boolean             // Auto-scaling enabled
@@ -127,8 +152,8 @@ export interface ComponentConfig {
   encryption?: boolean            // Server-side encryption
 
   // External/Third-party
-  rateLimitRps?: number           // Rate limit in RPS
-  timeout?: number                // Request timeout in ms
+  extRateLimitRps?: number        // Rate limit in RPS
+  extTimeout?: number             // Request timeout in ms
   retryCount?: number             // Number of retries
   circuitBreaker?: boolean        // Circuit breaker enabled
 }

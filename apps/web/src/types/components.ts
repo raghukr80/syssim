@@ -127,6 +127,51 @@ export const COMPONENT_META: ComponentMeta[] = [
     awsService: 'App Mesh',
     awsCostPerMonth: 0,
   },
+  {
+    type: 'sidecar_proxy',
+    label: 'Sidecar Proxy',
+    category: 'networking',
+    description: 'Sidecar proxy for mTLS, traffic splitting, and resilience patterns (Envoy/Linkerd)',
+    icon: '🔀',
+    defaultConfig: {
+      maxRps: 10000, latencyP50: 2, latencyP95: 5, latencyP99: 20,
+      connectionLimit: 10000, failureRate: 0.001,
+      proxyMode: 'sidecar', protocol: 'http', mtlsEnabled: true,
+      trafficSplit: {},
+    },
+    awsService: 'App Mesh (Envoy)',
+    awsCostPerMonth: 0,
+  },
+  {
+    type: 'rate_limiter',
+    label: 'Rate Limiter',
+    category: 'networking',
+    description: 'Request rate limiting with multiple algorithms and burst handling',
+    icon: '🚦',
+    defaultConfig: {
+      maxRps: 10000, latencyP50: 1, latencyP95: 3, latencyP99: 10,
+      connectionLimit: 10000, failureRate: 0.001,
+      rlAlgorithm: 'token-bucket', rateLimitRps: 1000, burstLimit: 2000,
+      keyType: 'ip', scope: 'per-instance',
+    },
+    awsService: 'API Gateway + Lambda@Edge',
+    awsCostPerMonth: 15,
+  },
+  {
+    type: 'circuit_breaker',
+    label: 'Circuit Breaker',
+    category: 'networking',
+    description: 'Automatic failure detection and circuit breaking for downstream services',
+    icon: '🔌',
+    defaultConfig: {
+      maxRps: 10000, latencyP50: 1, latencyP95: 3, latencyP99: 10,
+      connectionLimit: 10000, failureRate: 0.001,
+      failureThreshold: 50, successThreshold: 5, timeout: 30000,
+      halfOpenRequests: 10, monitoredEndpoints: [],
+    },
+    awsService: 'App Mesh / API Gateway',
+    awsCostPerMonth: 0,
+  },
 
   // ═══════════════════════════════════════════
   // COMPUTE
