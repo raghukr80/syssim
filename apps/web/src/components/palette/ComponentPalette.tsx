@@ -186,6 +186,26 @@ function ComponentsTab() {
                       </div>
                       <div className="text-[10px] text-text-dim truncate">{meta.awsService}</div>
                     </div>
+                    {/* Cloud Equivalents Tooltip */}
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50">
+                      <div className="bg-bg border border-border rounded-lg shadow-2xl p-3 w-72">
+                        <div className="text-xs font-semibold text-text mb-1">{meta.label}</div>
+                        <div className="text-[10px] text-text-dim mb-2">{meta.description}</div>
+                        <div className="space-y-1">
+                          <div className="text-[9px] font-medium text-text uppercase tracking-wide">Cloud Equivalents</div>
+                          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[9px]">
+                            <div className="text-accent font-medium">AWS</div>
+                            <div className="text-text-dim">{meta.cloudEquivalents.aws}</div>
+                            <div className="text-blue-400 font-medium">Azure</div>
+                            <div className="text-text-dim">{meta.cloudEquivalents.azure}</div>
+                            <div className="text-orange-400 font-medium">GCP</div>
+                            <div className="text-text-dim">{meta.cloudEquivalents.gcp}</div>
+                            <div className="text-green-400 font-medium">OSS</div>
+                            <div className="text-text-dim">{meta.cloudEquivalents.oss}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}

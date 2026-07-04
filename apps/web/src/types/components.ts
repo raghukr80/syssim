@@ -17,6 +17,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'ALB',
     awsCostPerMonth: 22,
+    cloudEquivalents: {
+      aws: 'ALB / NLB / CLB',
+      azure: 'Azure Load Balancer / Application Gateway',
+      gcp: 'Cloud Load Balancing',
+      oss: 'HAProxy, NGINX, Traefik, Envoy'
+    }
   },
   {
     type: 'api_gateway',
@@ -31,6 +37,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'API Gateway',
     awsCostPerMonth: 35,
+    cloudEquivalents: {
+      aws: 'API Gateway',
+      azure: 'API Management',
+      gcp: 'API Gateway / Cloud Endpoints',
+      oss: 'Kong, Traefik, Tyk, KrakenD'
+    }
   },
   {
     type: 'api_management',
@@ -45,6 +57,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'API Gateway (Enterprise)',
     awsCostPerMonth: 120,
+    cloudEquivalents: {
+      aws: 'API Gateway (Enterprise)',
+      azure: 'API Management (Premium)',
+      gcp: 'Apigee',
+      oss: 'Kong Enterprise, Tyk, WSO2'
+    }
   },
   {
     type: 'cdn',
@@ -59,6 +77,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'CloudFront',
     awsCostPerMonth: 85,
+    cloudEquivalents: {
+      aws: 'CloudFront',
+      azure: 'Azure CDN / Front Door',
+      gcp: 'Cloud CDN',
+      oss: 'Varnish, NGINX, Caddy, Cloudflare (self-hosted)'
+    }
   },
   {
     type: 'dns',
@@ -72,6 +96,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Route 53',
     awsCostPerMonth: 50,
+    cloudEquivalents: {
+      aws: 'Route 53',
+      azure: 'Azure DNS',
+      gcp: 'Cloud DNS',
+      oss: 'CoreDNS, PowerDNS, BIND, Unbound'
+    }
   },
   {
     type: 'waf',
@@ -86,6 +116,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'WAF',
     awsCostPerMonth: 30,
+    cloudEquivalents: {
+      aws: 'WAF',
+      azure: 'Azure WAF / Front Door WAF',
+      gcp: 'Cloud Armor',
+      oss: 'ModSecurity, NAXSI, CrowdSec, Coraza'
+    }
   },
   {
     type: 'vpc',
@@ -99,6 +135,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'VPC',
     awsCostPerMonth: 0,
+    cloudEquivalents: {
+      aws: 'VPC',
+      azure: 'Virtual Network (VNet)',
+      gcp: 'VPC Network',
+      oss: 'OpenVPN, WireGuard, Tailscale, Calico'
+    }
   },
   {
     type: 'nat_gateway',
@@ -112,6 +154,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'NAT Gateway',
     awsCostPerMonth: 32,
+    cloudEquivalents: {
+      aws: 'NAT Gateway',
+      azure: 'NAT Gateway',
+      gcp: 'Cloud NAT',
+      oss: 'iptables/nftables, NAT instance, FRR'
+    }
   },
   {
     type: 'service_mesh',
@@ -126,6 +174,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'App Mesh',
     awsCostPerMonth: 0,
+    cloudEquivalents: {
+      aws: 'App Mesh',
+      azure: 'Open Service Mesh / Azure Service Mesh',
+      gcp: 'Traffic Director / Anthos Service Mesh',
+      oss: 'Istio, Linkerd, Consul Connect, Kuma'
+    }
   },
   {
     type: 'sidecar_proxy',
@@ -141,6 +195,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'App Mesh (Envoy)',
     awsCostPerMonth: 0,
+    cloudEquivalents: {
+      aws: 'App Mesh (Envoy)',
+      azure: 'Open Service Mesh (Envoy)',
+      gcp: 'Anthos Service Mesh (Envoy)',
+      oss: 'Envoy, Linkerd2-proxy, Traefik Mesh'
+    }
   },
   {
     type: 'rate_limiter',
@@ -156,6 +216,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'API Gateway + Lambda@Edge',
     awsCostPerMonth: 15,
+    cloudEquivalents: {
+      aws: 'API Gateway Usage Plans / Lambda@Edge',
+      azure: 'API Management Rate Limits / Front Door Rules',
+      gcp: 'API Gateway Quotas / Cloud Armor Rate Limiting',
+      oss: 'Envoy Rate Limit, NGINX limit_req, Kong Rate Limiting, Traefik RateLimit'
+    }
   },
   {
     type: 'circuit_breaker',
@@ -171,6 +237,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'App Mesh / API Gateway',
     awsCostPerMonth: 0,
+    cloudEquivalents: {
+      aws: 'App Mesh / API Gateway',
+      azure: 'Open Service Mesh / API Management Policies',
+      gcp: 'Traffic Director / Cloud Load Balancing',
+      oss: 'Istio DestinationRule, Hystrix, Resilience4j, GoBreaker, PyBreaker'
+    }
   },
 
   // ═══════════════════════════════════════════
@@ -190,6 +262,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'EC2 (m5.large)',
     awsCostPerMonth: 70,
+    cloudEquivalents: {
+      aws: 'EC2 / Elastic Beanstalk',
+      azure: 'Azure App Service / VMSS',
+      gcp: 'Compute Engine / Cloud Run',
+      oss: 'Apache, NGINX, Express, Flask, FastAPI',
+    }
   },
   {
     type: 'microservice',
@@ -205,6 +283,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'ECS/Fargate',
     awsCostPerMonth: 60,
+    cloudEquivalents: {
+      aws: 'ECS / EKS',
+      azure: 'Container Apps / AKS',
+      gcp: 'Cloud Run / GKE',
+      oss: 'Spring Boot, Express, FastAPI, Flask',
+    }
   },
   {
     type: 'serverless',
@@ -219,6 +303,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Lambda',
     awsCostPerMonth: 20,
+    cloudEquivalents: {
+      aws: 'Lambda',
+      azure: 'Azure Functions',
+      gcp: 'Cloud Functions',
+      oss: 'OpenFaaS, Kubeless, Fn Project, Knative',
+    }
   },
   {
     type: 'container_cluster',
@@ -234,6 +324,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'EKS/Fargate',
     awsCostPerMonth: 150,
+    cloudEquivalents: {
+      aws: 'EKS / Fargate',
+      azure: 'AKS / Container Apps',
+      gcp: 'GKE / Cloud Run',
+      oss: 'Kubernetes, Docker Swarm, Nomad, OpenShift',
+    }
   },
   {
     type: 'graphql',
@@ -249,6 +345,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'AppSync',
     awsCostPerMonth: 40,
+    cloudEquivalents: {
+      aws: 'AppSync',
+      azure: 'API Management / Apollo',
+      gcp: 'Apollo GraphQL / Cloud Run',
+      oss: 'Apollo Server, GraphQL Yoga, Hasura, Mercurius',
+    }
   },
   {
     type: 'websocket',
@@ -264,6 +366,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'API Gateway (WebSocket)',
     awsCostPerMonth: 25,
+    cloudEquivalents: {
+      aws: 'API Gateway (WebSocket) / IoT',
+      azure: 'Azure Web PubSub / SignalR',
+      gcp: 'Cloud Pub/Sub + Cloud Run',
+      oss: 'Socket.io, uWebSockets, Gorilla WebSocket, Centrifugo, Phoenix Channels',
+    }
   },
   {
     type: 'worker',
@@ -279,6 +387,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'EC2 (Worker)',
     awsCostPerMonth: 50,
+    cloudEquivalents: {
+      aws: 'EC2 / ECS Worker',
+      azure: 'Container Apps / Functions (Worker)',
+      gcp: 'Cloud Run Jobs / Cloud Tasks',
+      oss: 'Sidekiq, Celery, BullMQ, Laravel Queue, Hangfire',
+    }
   },
   {
     type: 'cron_job',
@@ -293,6 +407,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'EventBridge + Lambda',
     awsCostPerMonth: 5,
+    cloudEquivalents: {
+      aws: 'EventBridge Scheduler / Lambda',
+      azure: 'Azure Logic Apps / Functions Cron',
+      gcp: 'Cloud Scheduler / Cloud Functions',
+      oss: 'Linux cron, Kubernetes CronJob, Airflow DAG, Cavalcade',
+    }
   },
 
   // ═══════════════════════════════════════════
@@ -312,6 +432,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'RDS PostgreSQL',
     awsCostPerMonth: 120,
+    cloudEquivalents: {
+      aws: 'RDS / Aurora (PostgreSQL)',
+      azure: 'Azure Database for PostgreSQL / Cosmos DB',
+      gcp: 'Cloud SQL / Cloud Spanner',
+      oss: 'PostgreSQL, MySQL, MariaDB, CockroachDB',
+    }
   },
   {
     type: 'cache',
@@ -326,6 +452,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'ElastiCache Redis',
     awsCostPerMonth: 45,
+    cloudEquivalents: {
+      aws: 'ElastiCache (Redis/Memcached)',
+      azure: 'Azure Cache for Redis / Managed Redis',
+      gcp: 'Memorystore',
+      oss: 'Redis, Memcached, Hazelcast, KeyDB, Dragonfly',
+    }
   },
   {
     type: 'storage',
@@ -340,6 +472,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'S3',
     awsCostPerMonth: 23,
+    cloudEquivalents: {
+      aws: 'S3',
+      azure: 'Azure Blob Storage',
+      gcp: 'Cloud Storage',
+      oss: 'MinIO, Ceph, Garage, SeaweedFS',
+    }
   },
   {
     type: 'search_engine',
@@ -355,6 +493,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'OpenSearch',
     awsCostPerMonth: 100,
+    cloudEquivalents: {
+      aws: 'OpenSearch / Elasticsearch Service',
+      azure: 'Azure Cognitive Search / Elastic Cloud',
+      gcp: 'Elasticsearch on GCE / Vertex AI Search',
+      oss: 'Elasticsearch, OpenSearch, Solr, Meilisearch, Typesense',
+    }
   },
   {
     type: 'graph_database',
@@ -370,6 +514,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Neptune',
     awsCostPerMonth: 150,
+    cloudEquivalents: {
+      aws: 'Neptune',
+      azure: 'Cosmos DB (Gremlin)',
+      gcp: 'JanusGraph on GCE',
+      oss: 'Neo4j, JanusGraph, ArangoDB, Dgraph, SurrealDB',
+    }
   },
   {
     type: 'time_series_db',
@@ -385,6 +535,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Timestream',
     awsCostPerMonth: 80,
+    cloudEquivalents: {
+      aws: 'Timestream',
+      azure: 'Azure Data Explorer / Time Series Insights',
+      gcp: 'BigQuery + Cloud Monitoring',
+      oss: 'InfluxDB, TimescaleDB, Prometheus, VictoriaMetrics, QuestDB',
+    }
   },
   {
     type: 'document_store',
@@ -400,6 +556,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'DocumentDB',
     awsCostPerMonth: 90,
+    cloudEquivalents: {
+      aws: 'DocumentDB',
+      azure: 'Cosmos DB (Core SQL / MongoDB API)',
+      gcp: 'Firestore / Datastore',
+      oss: 'MongoDB, Couchbase, CouchDB, RethinkDB, Firestore (OSS)',
+    }
   },
   {
     type: 'key_value_store',
@@ -415,6 +577,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'DynamoDB',
     awsCostPerMonth: 60,
+    cloudEquivalents: {
+      aws: 'DynamoDB',
+      azure: 'Azure Cosmos DB / Table Storage',
+      gcp: 'Bigtable / Firestore',
+      oss: 'Cassandra, ScyllaDB, FoundationDB, RocksDB, LevelDB',
+    }
   },
   {
     type: 'data_warehouse',
@@ -430,6 +598,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Redshift',
     awsCostPerMonth: 300,
+    cloudEquivalents: {
+      aws: 'Redshift / Athena',
+      azure: 'Azure Synapse Analytics / Fabric',
+      gcp: 'BigQuery',
+      oss: 'ClickHouse, Apache Druid, Pinot, DuckDB, Apache Doris',
+    }
   },
   {
     type: 'data_lake',
@@ -444,6 +618,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'S3 + Athena',
     awsCostPerMonth: 50,
+    cloudEquivalents: {
+      aws: 'S3 + Athena + Lake Formation',
+      azure: 'Azure Data Lake Storage (ADLS) Gen2',
+      gcp: 'Cloud Storage + BigQuery',
+      oss: 'Apache Iceberg, Delta Lake, Apache Hudi, MinIO, Presto/Trino',
+    }
   },
 
   // ═══════════════════════════════════════════
@@ -463,6 +643,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'MSK (Kafka)',
     awsCostPerMonth: 200,
+    cloudEquivalents: {
+      aws: 'MSK (Kafka) / SQS',
+      azure: 'Azure Event Hubs / Service Bus',
+      gcp: 'Cloud Pub/Sub',
+      oss: 'Apache Kafka, RabbitMQ, ActiveMQ, Pulsar, NATS',
+    }
   },
   {
     type: 'event_bus',
@@ -477,6 +663,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'EventBridge',
     awsCostPerMonth: 30,
+    cloudEquivalents: {
+      aws: 'EventBridge',
+      azure: 'Azure Event Grid',
+      gcp: 'Eventarc',
+      oss: 'Apache Kafka, NATS, Apache Pulsar, RabbitMQ Streams',
+    }
   },
   {
     type: 'notification_service',
@@ -491,6 +683,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'SNS',
     awsCostPerMonth: 20,
+    cloudEquivalents: {
+      aws: 'SNS / Pinpoint',
+      azure: 'Azure Notification Hubs',
+      gcp: 'Firebase Cloud Messaging (FCM)',
+      oss: 'Gotify, ntfy.sh, Apprise, Novu, OneSignal',
+    }
   },
   {
     type: 'email_service',
@@ -505,6 +703,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'SES',
     awsCostPerMonth: 10,
+    cloudEquivalents: {
+      aws: 'SES',
+      azure: 'Azure Communication Services Email',
+      gcp: 'SendGrid + Gmail API',
+      oss: 'Postfix, Exim, Mailgun, SendGrid (OSS SMTP), Postal',
+    }
   },
   {
     type: 'sms_service',
@@ -519,6 +723,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'SNS (SMS)',
     awsCostPerMonth: 15,
+    cloudEquivalents: {
+      aws: 'SNS (SMS) / End User Messaging',
+      azure: 'Azure Communication Services SMS',
+      gcp: 'Twilio + GCP',
+      oss: 'Kannel, Jasmin SMS Gateway, PlaySMS, Twilio (API)',
+    }
   },
 
   // ═══════════════════════════════════════════
@@ -537,6 +747,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Cognito',
     awsCostPerMonth: 25,
+    cloudEquivalents: {
+      aws: 'Cognito / IAM Identity Center',
+      azure: 'Azure AD / Entra ID (B2C/B2B)',
+      gcp: 'Identity Platform / Firebase Auth',
+      oss: 'Keycloak, Auth0, Ory Kratos, SuperTokens, Authentik',
+    }
   },
   {
     type: 'secrets_manager',
@@ -551,6 +767,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Secrets Manager',
     awsCostPerMonth: 5,
+    cloudEquivalents: {
+      aws: 'Secrets Manager / Parameter Store',
+      azure: 'Azure Key Vault',
+      gcp: 'Secret Manager',
+      oss: 'HashiCorp Vault, OpenBao, Infisical, Doppler, Confidant',
+    }
   },
   {
     type: 'certificate_manager',
@@ -565,6 +787,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'ACM',
     awsCostPerMonth: 0,
+    cloudEquivalents: {
+      aws: 'ACM',
+      azure: 'Azure Key Vault Certificates',
+      gcp: 'Certificate Manager',
+      oss: 'Certbot (Let\'s Encrypt), Step CA, cfssl, HashiCorp Vault PKI, Smallstep',
+    }
   },
   {
     type: 'ddos_protection',
@@ -579,6 +807,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Shield Advanced',
     awsCostPerMonth: 3000,
+    cloudEquivalents: {
+      aws: 'Shield Advanced / CloudFront',
+      azure: 'Azure DDoS Protection (Standard/Enterprise)',
+      gcp: 'Cloud Armor (Enterprise)',
+      oss: 'Cloudflare (Magic Transit), Fastly, DDoS Deflate, CrowdSec, Coraza',
+    }
   },
 
   // ═══════════════════════════════════════════
@@ -596,6 +830,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'CloudWatch',
     awsCostPerMonth: 15,
+    cloudEquivalents: {
+      aws: 'CloudWatch / Managed Grafana',
+      azure: 'Azure Monitor / Managed Grafana',
+      gcp: 'Cloud Monitoring / Managed Prometheus',
+      oss: 'Prometheus, Grafana, Datadog Agent, SigNoz, Netdata',
+    }
   },
   {
     type: 'logging',
@@ -609,6 +849,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'CloudWatch Logs',
     awsCostPerMonth: 20,
+    cloudEquivalents: {
+      aws: 'CloudWatch Logs / OpenSearch',
+      azure: 'Azure Monitor Logs / Log Analytics',
+      gcp: 'Cloud Logging',
+      oss: 'ELK/EFK Stack, Loki + Grafana, Graylog, Vector, Fluentd',
+    }
   },
   {
     type: 'tracing',
@@ -622,6 +868,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'X-Ray',
     awsCostPerMonth: 10,
+    cloudEquivalents: {
+      aws: 'X-Ray / CloudWatch RUM',
+      azure: 'Azure Monitor Application Insights',
+      gcp: 'Cloud Trace',
+      oss: 'Jaeger, Zipkin, OpenTelemetry Collector, Grafana Tempo, SigNoz',
+    }
   },
   {
     type: 'alerting',
@@ -635,6 +887,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'SNS + PagerDuty',
     awsCostPerMonth: 15,
+    cloudEquivalents: {
+      aws: 'SNS + Lambda / CloudWatch Alarms',
+      azure: 'Azure Monitor Alerts / Action Groups',
+      gcp: 'Cloud Monitoring Alerting',
+      oss: 'Prometheus Alertmanager, Grafana Alerting, PagerDuty, Keep, Nightingale',
+    }
   },
 
   // ═══════════════════════════════════════════
@@ -655,6 +913,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'SageMaker Endpoint',
     awsCostPerMonth: 200,
+    cloudEquivalents: {
+      aws: 'SageMaker Inference / Bedrock',
+      azure: 'Azure ML Managed Endpoints / AI Studio',
+      gcp: 'Vertex AI Prediction',
+      oss: 'TensorFlow Serving, Triton, BentoML, Cortex, TorchServe',
+    }
   },
   {
     type: 'ml_training',
@@ -671,6 +935,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'SageMaker Training',
     awsCostPerMonth: 500,
+    cloudEquivalents: {
+      aws: 'SageMaker Training',
+      azure: 'Azure ML Compute Clusters',
+      gcp: 'Vertex AI Training',
+      oss: 'Ray Train, Kubeflow, MLflow, Determined AI, Horovod',
+    }
   },
   {
     type: 'feature_store',
@@ -686,6 +956,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'SageMaker Feature Store',
     awsCostPerMonth: 40,
+    cloudEquivalents: {
+      aws: 'SageMaker Feature Store',
+      azure: 'Azure ML Feature Store',
+      gcp: 'Vertex AI Feature Store',
+      oss: 'Feast, Tecton (OSS), Hopsworks, Chronon, Feathr',
+    }
   },
   {
     type: 'vector_search',
@@ -701,6 +977,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'OpenSearch (k-NN)',
     awsCostPerMonth: 100,
+    cloudEquivalents: {
+      aws: 'OpenSearch (k-NN) / Bedrock KB',
+      azure: 'Azure AI Search (Vector) / Cosmos DB Vector',
+      gcp: 'Vertex AI Vector Search / AlloyDB',
+      oss: 'Milvus, Weaviate, Qdrant, Chroma, LanceDB, Pinecone Lite',
+    }
   },
   {
     type: 'recommendation_engine',
@@ -717,6 +999,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Personalize',
     awsCostPerMonth: 150,
+    cloudEquivalents: {
+      aws: 'Personalize / SageMaker RT',
+      azure: 'Azure Personalizer / Azure ML',
+      gcp: 'Vertex AI (Recommendations AI / Retail)',
+      oss: 'Cortex, BentoML, Merlin, LightFM, Implicit, Surprise',
+    }
   },
 
   // ═══════════════════════════════════════════
@@ -746,6 +1034,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Custom',
     awsCostPerMonth: 0,
+    cloudEquivalents: {
+      aws: 'Custom (Any AWS Service)',
+      azure: 'Custom (Any Azure Service)',
+      gcp: 'Custom (Any GCP Service)',
+      oss: 'Any OSS / Custom Stack',
+    }
   },
 
   // ═══════════════════════════════════════════
@@ -764,6 +1058,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'N/A',
     awsCostPerMonth: 0,
+    cloudEquivalents: {
+      aws: 'N/A (External)',
+      azure: 'N/A (External)',
+      gcp: 'N/A (External)',
+      oss: 'N/A (External)',
+    }
   },
   {
     type: 'client',
@@ -777,6 +1077,12 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'N/A',
     awsCostPerMonth: 0,
+    cloudEquivalents: {
+      aws: 'N/A',
+      azure: 'N/A',
+      gcp: 'N/A',
+      oss: 'N/A',
+    }
   },
 ]
 

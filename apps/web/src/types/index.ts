@@ -309,4 +309,10 @@ export interface ComponentMeta {
   defaultConfig: ComponentConfig
   awsService: string
   awsCostPerMonth: number  // base cost
+  cloudEquivalents: {
+    aws: string
+    azure: string
+    gcp: string
+    oss: string
+  }
 }
