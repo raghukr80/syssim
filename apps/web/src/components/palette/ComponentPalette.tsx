@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useDiagramStore } from '../../stores/diagramStore'
 import { COMPONENT_META, CATEGORIES } from '../../types/components'
 import type { ComponentCategory, ChaosScenario, ChaosCategory, ComponentType } from '../../types'
@@ -112,9 +113,23 @@ const CATEGORY_CONFIG: Record<ChaosCategory, { label: string; icon: React.ReactN
 
 export function ComponentPalette() {
   const [activeTab, setActiveTab] = useState<'components' | 'chaos'>('components')
+  const [hoveredMeta, setHoveredMeta] = useState<{ meta: typeof COMPONENT_META[0]; pos: DOMRect } | null>(null)
+  const hideTimeoutRef = useRef<number | null>(null)
+
+  const showTooltip = (meta: typeof COMPONENT_META[0], rect: DOMRect) => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current)
+      hideTimeoutRef.current = null
+    }
+    setHoveredMeta({ meta, pos: rect })
+  }
+
+  const scheduleHide = () => {
+    hideTimeoutRef.current = window.setTimeout(() => setHoveredMeta(null), 150)
+  }
 
   return (
-    <div className="w-60 bg-surface border-r border-border flex flex-col overflow-hidden shrink-0">
+    <div className="w-60 bg-surface border-r border-border flex flex-col h-full shrink-0">
       {/* Tab bar */}
       <div className="flex border-b border-border shrink-0">
         <button
@@ -142,27 +157,63 @@ export function ComponentPalette() {
       </div>
 
       {/* Tab content */}
-      <div className="flex-1 overflow-hidden flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {activeTab === 'components' ? (
-          <ComponentsTab />
+          <ComponentsTab onHover={showTooltip} onHoverEnd={scheduleHide} />
         ) : (
           <ChaosTab />
         )}
       </div>
+
+      {/* Portal-based tooltip for viewport-aware positioning */}
+      {hoveredMeta && createPortal(
+        <div
+          className="fixed z-[100] pointer-events-none"
+          style={{
+            left: hoveredMeta.pos.right + 8 + 288 > window.innerWidth ? undefined : hoveredMeta.pos.right + 8,
+            right: hoveredMeta.pos.right + 8 + 288 > window.innerWidth ? 8 : undefined,
+            top: Math.min(hoveredMeta.pos.top, window.innerHeight - 180),
+          }}
+        >
+          <div className="bg-bg border border-border rounded-lg shadow-2xl p-3 w-72">
+            <div className="text-xs font-semibold text-text mb-1">{hoveredMeta.meta.label}</div>
+            <div className="text-[10px] text-text-dim mb-2">{hoveredMeta.meta.description}</div>
+            <div className="space-y-1 max-h-40 overflow-y-auto">
+              <div className="text-[9px] font-medium text-text uppercase tracking-wide">Cloud Equivalents</div>
+              <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[9px]">
+                <div className="text-accent font-medium">AWS</div>
+                <div className="text-text-dim">{hoveredMeta.meta.cloudEquivalents.aws}</div>
+                <div className="text-blue-400 font-medium">Azure</div>
+                <div className="text-text-dim">{hoveredMeta.meta.cloudEquivalents.azure}</div>
+                <div className="text-orange-400 font-medium">GCP</div>
+                <div className="text-text-dim">{hoveredMeta.meta.cloudEquivalents.gcp}</div>
+                <div className="text-green-400 font-medium">OSS</div>
+                <div className="text-text-dim">{hoveredMeta.meta.cloudEquivalents.oss}</div>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   )
 }
 
 // ─── Components Tab ───────────────────────────────────────────────
-function ComponentsTab() {
+interface ComponentsTabProps {
+  onHover: (meta: typeof COMPONENT_META[0], rect: DOMRect) => void
+  onHoverEnd: () => void
+}
+
+function ComponentsTab({ onHover, onHoverEnd }: ComponentsTabProps) {
   const handleDragStart = (e: React.DragEvent, componentType: string) => {
     e.dataTransfer.setData('application/syssim-component', componentType)
     e.dataTransfer.effectAllowed = 'move'
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="flex-1 overflow-y-auto py-1">
+    <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+      <div className="flex-1 overflow-y-auto overflow-x-visible py-1">
         {CATEGORIES.map(cat => {
           const items = COMPONENT_META.filter(m => m.category === cat.key as string)
           return (
@@ -175,36 +226,20 @@ function ComponentsTab() {
                   key={meta.type}
                   draggable
                   onDragStart={(e) => handleDragStart(e, meta.type)}
-                  className="mx-2 my-0.5 px-2 py-1.5 rounded cursor-grab active:cursor-grabbing
-                             hover:bg-surface-hover transition-colors group relative"
+                  className="mx-2 my-0.5 px-2 py-1.5 rounded cursor-grab active:cursor-grabbing hover:bg-surface-hover transition-colors"
+                  onMouseEnter={(e) => {
+                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+                    onHover(meta, rect)
+                  }}
+                  onMouseLeave={onHoverEnd}
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-sm">{meta.icon}</span>
                     <div className="min-w-0">
-                      <div className="text-xs font-medium text-text group-hover:text-accent transition-colors truncate">
+                      <div className="text-xs font-medium text-text truncate">
                         {meta.label}
                       </div>
                       <div className="text-[10px] text-text-dim truncate">{meta.awsService}</div>
-                    </div>
-                    {/* Cloud Equivalents Tooltip */}
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50">
-                      <div className="bg-bg border border-border rounded-lg shadow-2xl p-3 w-72">
-                        <div className="text-xs font-semibold text-text mb-1">{meta.label}</div>
-                        <div className="text-[10px] text-text-dim mb-2">{meta.description}</div>
-                        <div className="space-y-1">
-                          <div className="text-[9px] font-medium text-text uppercase tracking-wide">Cloud Equivalents</div>
-                          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[9px]">
-                            <div className="text-accent font-medium">AWS</div>
-                            <div className="text-text-dim">{meta.cloudEquivalents.aws}</div>
-                            <div className="text-blue-400 font-medium">Azure</div>
-                            <div className="text-text-dim">{meta.cloudEquivalents.azure}</div>
-                            <div className="text-orange-400 font-medium">GCP</div>
-                            <div className="text-text-dim">{meta.cloudEquivalents.gcp}</div>
-                            <div className="text-green-400 font-medium">OSS</div>
-                            <div className="text-text-dim">{meta.cloudEquivalents.oss}</div>
-                          </div>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -259,7 +294,7 @@ function ChaosTab() {
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col min-h-0">
       {/* Active chaos summary */}
       {activeCount > 0 && (
         <div className="px-3 py-2 border-b border-border bg-error/5 shrink-0">
