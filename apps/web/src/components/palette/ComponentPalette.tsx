@@ -176,7 +176,7 @@ function ComponentsTab() {
                   draggable
                   onDragStart={(e) => handleDragStart(e, meta.type)}
                   className="mx-2 my-0.5 px-2 py-1.5 rounded cursor-grab active:cursor-grabbing
-                             hover:bg-surface-hover transition-colors group"
+                             hover:bg-surface-hover transition-colors group relative"
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-sm">{meta.icon}</span>
