@@ -55,13 +55,21 @@ export function PropertiesPanel({ setNodes }: { setNodes: (fn: (nodes: Node[]) =
 
   if (!selectedNode) return null
 
-  const config = selectedNode.data.config
+  const config = selectedNode.data.config as ComponentConfig
   const meta = getComponentMeta(selectedNode.data.componentType)
   const nodeColor = selectedNode.data.color || 'var(--color-accent)'
   const iconUrl = selectedNode.data.icon || null
 
   const updateConfig = (key: keyof ComponentConfig, value: number | string | boolean) => {
     store.updateNodeConfig(selectedNode.id, { [key]: value })
+    // Also update ReactFlow nodes state to keep it in sync
+    setNodes(currentNodes =>
+      currentNodes.map(n =>
+        n.id === selectedNode.id
+          ? { ...n, data: { ...n.data, config: { ...(n.data.config as Record<string, any>), [key]: value } } }
+          : n
+      )
+    )
   }
 
   const handleClose = () => {
