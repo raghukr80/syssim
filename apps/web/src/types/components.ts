@@ -17,6 +17,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'ALB',
     awsCostPerMonth: 22,
+    azureCostPerMonth: 22,
+    gcpCostPerMonth: 22,
     cloudEquivalents: {
       aws: 'ALB / NLB / CLB',
       azure: 'Azure Load Balancer / Application Gateway',
@@ -37,6 +39,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'API Gateway',
     awsCostPerMonth: 35,
+    azureCostPerMonth: 35,
+    gcpCostPerMonth: 35,
     cloudEquivalents: {
       aws: 'API Gateway',
       azure: 'API Management',
@@ -57,6 +61,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'API Gateway (Enterprise)',
     awsCostPerMonth: 120,
+    azureCostPerMonth: 120,
+    gcpCostPerMonth: 120,
     cloudEquivalents: {
       aws: 'API Gateway (Enterprise)',
       azure: 'API Management (Premium)',
@@ -77,6 +83,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'CloudFront',
     awsCostPerMonth: 85,
+    azureCostPerMonth: 85,
+    gcpCostPerMonth: 85,
     cloudEquivalents: {
       aws: 'CloudFront',
       azure: 'Azure CDN / Front Door',
@@ -96,6 +104,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Route 53',
     awsCostPerMonth: 50,
+    azureCostPerMonth: 50,
+    gcpCostPerMonth: 50,
     cloudEquivalents: {
       aws: 'Route 53',
       azure: 'Azure DNS',
@@ -116,6 +126,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'WAF',
     awsCostPerMonth: 30,
+    azureCostPerMonth: 30,
+    gcpCostPerMonth: 30,
     cloudEquivalents: {
       aws: 'WAF',
       azure: 'Azure WAF / Front Door WAF',
@@ -135,6 +147,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'VPC',
     awsCostPerMonth: 0,
+    azureCostPerMonth: 0,
+    gcpCostPerMonth: 0,
     cloudEquivalents: {
       aws: 'VPC',
       azure: 'Virtual Network (VNet)',
@@ -154,6 +168,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'NAT Gateway',
     awsCostPerMonth: 32,
+    azureCostPerMonth: 32,
+    gcpCostPerMonth: 32,
     cloudEquivalents: {
       aws: 'NAT Gateway',
       azure: 'NAT Gateway',
@@ -174,6 +190,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'App Mesh',
     awsCostPerMonth: 0,
+    azureCostPerMonth: 0,
+    gcpCostPerMonth: 0,
     cloudEquivalents: {
       aws: 'App Mesh',
       azure: 'Open Service Mesh / Azure Service Mesh',
@@ -195,6 +213,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'App Mesh (Envoy)',
     awsCostPerMonth: 0,
+    azureCostPerMonth: 0,
+    gcpCostPerMonth: 0,
     cloudEquivalents: {
       aws: 'App Mesh (Envoy)',
       azure: 'Open Service Mesh (Envoy)',
@@ -216,6 +236,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'API Gateway + Lambda@Edge',
     awsCostPerMonth: 15,
+    azureCostPerMonth: 15,
+    gcpCostPerMonth: 15,
     cloudEquivalents: {
       aws: 'API Gateway Usage Plans / Lambda@Edge',
       azure: 'API Management Rate Limits / Front Door Rules',
@@ -237,6 +259,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'App Mesh / API Gateway',
     awsCostPerMonth: 0,
+    azureCostPerMonth: 0,
+    gcpCostPerMonth: 0,
     cloudEquivalents: {
       aws: 'App Mesh / API Gateway',
       azure: 'Open Service Mesh / API Management Policies',
@@ -262,6 +286,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'EC2 (m5.large)',
     awsCostPerMonth: 70,
+    azureCostPerMonth: 70,
+    gcpCostPerMonth: 70,
     cloudEquivalents: {
       aws: 'EC2 / Elastic Beanstalk',
       azure: 'Azure App Service / VMSS',
@@ -283,6 +309,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'ECS/Fargate',
     awsCostPerMonth: 60,
+    azureCostPerMonth: 60,
+    gcpCostPerMonth: 60,
     cloudEquivalents: {
       aws: 'ECS / EKS',
       azure: 'Container Apps / AKS',
@@ -303,6 +331,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Lambda',
     awsCostPerMonth: 20,
+    azureCostPerMonth: 20,
+    gcpCostPerMonth: 20,
     cloudEquivalents: {
       aws: 'Lambda',
       azure: 'Azure Functions',
@@ -324,6 +354,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'EKS/Fargate',
     awsCostPerMonth: 150,
+    azureCostPerMonth: 150,
+    gcpCostPerMonth: 150,
     cloudEquivalents: {
       aws: 'EKS / Fargate',
       azure: 'AKS / Container Apps',
@@ -345,6 +377,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'AppSync',
     awsCostPerMonth: 40,
+    azureCostPerMonth: 40,
+    gcpCostPerMonth: 40,
     cloudEquivalents: {
       aws: 'AppSync',
       azure: 'API Management / Apollo',
@@ -366,6 +400,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'API Gateway (WebSocket)',
     awsCostPerMonth: 25,
+    azureCostPerMonth: 25,
+    gcpCostPerMonth: 25,
     cloudEquivalents: {
       aws: 'API Gateway (WebSocket) / IoT',
       azure: 'Azure Web PubSub / SignalR',
@@ -387,6 +423,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'EC2 (Worker)',
     awsCostPerMonth: 50,
+    azureCostPerMonth: 50,
+    gcpCostPerMonth: 50,
     cloudEquivalents: {
       aws: 'EC2 / ECS Worker',
       azure: 'Container Apps / Functions (Worker)',
@@ -407,6 +445,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'EventBridge + Lambda',
     awsCostPerMonth: 5,
+    azureCostPerMonth: 5,
+    gcpCostPerMonth: 5,
     cloudEquivalents: {
       aws: 'EventBridge Scheduler / Lambda',
       azure: 'Azure Logic Apps / Functions Cron',
@@ -432,6 +472,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'RDS PostgreSQL',
     awsCostPerMonth: 120,
+    azureCostPerMonth: 120,
+    gcpCostPerMonth: 120,
     cloudEquivalents: {
       aws: 'RDS / Aurora (PostgreSQL)',
       azure: 'Azure Database for PostgreSQL / Cosmos DB',
@@ -452,6 +494,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'ElastiCache Redis',
     awsCostPerMonth: 45,
+    azureCostPerMonth: 45,
+    gcpCostPerMonth: 45,
     cloudEquivalents: {
       aws: 'ElastiCache (Redis/Memcached)',
       azure: 'Azure Cache for Redis / Managed Redis',
@@ -472,6 +516,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'S3',
     awsCostPerMonth: 23,
+    azureCostPerMonth: 23,
+    gcpCostPerMonth: 23,
     cloudEquivalents: {
       aws: 'S3',
       azure: 'Azure Blob Storage',
@@ -493,6 +539,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'OpenSearch',
     awsCostPerMonth: 100,
+    azureCostPerMonth: 100,
+    gcpCostPerMonth: 100,
     cloudEquivalents: {
       aws: 'OpenSearch / Elasticsearch Service',
       azure: 'Azure Cognitive Search / Elastic Cloud',
@@ -514,6 +562,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Neptune',
     awsCostPerMonth: 150,
+    azureCostPerMonth: 150,
+    gcpCostPerMonth: 150,
     cloudEquivalents: {
       aws: 'Neptune',
       azure: 'Cosmos DB (Gremlin)',
@@ -535,6 +585,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Timestream',
     awsCostPerMonth: 80,
+    azureCostPerMonth: 80,
+    gcpCostPerMonth: 80,
     cloudEquivalents: {
       aws: 'Timestream',
       azure: 'Azure Data Explorer / Time Series Insights',
@@ -556,6 +608,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'DocumentDB',
     awsCostPerMonth: 90,
+    azureCostPerMonth: 90,
+    gcpCostPerMonth: 90,
     cloudEquivalents: {
       aws: 'DocumentDB',
       azure: 'Cosmos DB (Core SQL / MongoDB API)',
@@ -577,6 +631,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'DynamoDB',
     awsCostPerMonth: 60,
+    azureCostPerMonth: 60,
+    gcpCostPerMonth: 60,
     cloudEquivalents: {
       aws: 'DynamoDB',
       azure: 'Azure Cosmos DB / Table Storage',
@@ -598,6 +654,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Redshift',
     awsCostPerMonth: 300,
+    azureCostPerMonth: 300,
+    gcpCostPerMonth: 300,
     cloudEquivalents: {
       aws: 'Redshift / Athena',
       azure: 'Azure Synapse Analytics / Fabric',
@@ -618,6 +676,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'S3 + Athena',
     awsCostPerMonth: 50,
+    azureCostPerMonth: 50,
+    gcpCostPerMonth: 50,
     cloudEquivalents: {
       aws: 'S3 + Athena + Lake Formation',
       azure: 'Azure Data Lake Storage (ADLS) Gen2',
@@ -643,6 +703,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'MSK (Kafka)',
     awsCostPerMonth: 200,
+    azureCostPerMonth: 200,
+    gcpCostPerMonth: 200,
     cloudEquivalents: {
       aws: 'MSK (Kafka) / SQS',
       azure: 'Azure Event Hubs / Service Bus',
@@ -663,6 +725,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'EventBridge',
     awsCostPerMonth: 30,
+    azureCostPerMonth: 30,
+    gcpCostPerMonth: 30,
     cloudEquivalents: {
       aws: 'EventBridge',
       azure: 'Azure Event Grid',
@@ -683,6 +747,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'SNS',
     awsCostPerMonth: 20,
+    azureCostPerMonth: 20,
+    gcpCostPerMonth: 20,
     cloudEquivalents: {
       aws: 'SNS / Pinpoint',
       azure: 'Azure Notification Hubs',
@@ -703,6 +769,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'SES',
     awsCostPerMonth: 10,
+    azureCostPerMonth: 10,
+    gcpCostPerMonth: 10,
     cloudEquivalents: {
       aws: 'SES',
       azure: 'Azure Communication Services Email',
@@ -723,6 +791,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'SNS (SMS)',
     awsCostPerMonth: 15,
+    azureCostPerMonth: 15,
+    gcpCostPerMonth: 15,
     cloudEquivalents: {
       aws: 'SNS (SMS) / End User Messaging',
       azure: 'Azure Communication Services SMS',
@@ -747,6 +817,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Cognito',
     awsCostPerMonth: 25,
+    azureCostPerMonth: 25,
+    gcpCostPerMonth: 25,
     cloudEquivalents: {
       aws: 'Cognito / IAM Identity Center',
       azure: 'Azure AD / Entra ID (B2C/B2B)',
@@ -767,6 +839,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Secrets Manager',
     awsCostPerMonth: 5,
+    azureCostPerMonth: 5,
+    gcpCostPerMonth: 5,
     cloudEquivalents: {
       aws: 'Secrets Manager / Parameter Store',
       azure: 'Azure Key Vault',
@@ -787,6 +861,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'ACM',
     awsCostPerMonth: 0,
+    azureCostPerMonth: 0,
+    gcpCostPerMonth: 0,
     cloudEquivalents: {
       aws: 'ACM',
       azure: 'Azure Key Vault Certificates',
@@ -807,6 +883,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Shield Advanced',
     awsCostPerMonth: 3000,
+    azureCostPerMonth: 3000,
+    gcpCostPerMonth: 3000,
     cloudEquivalents: {
       aws: 'Shield Advanced / CloudFront',
       azure: 'Azure DDoS Protection (Standard/Enterprise)',
@@ -830,6 +908,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'CloudWatch',
     awsCostPerMonth: 15,
+    azureCostPerMonth: 15,
+    gcpCostPerMonth: 15,
     cloudEquivalents: {
       aws: 'CloudWatch / Managed Grafana',
       azure: 'Azure Monitor / Managed Grafana',
@@ -849,6 +929,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'CloudWatch Logs',
     awsCostPerMonth: 20,
+    azureCostPerMonth: 20,
+    gcpCostPerMonth: 20,
     cloudEquivalents: {
       aws: 'CloudWatch Logs / OpenSearch',
       azure: 'Azure Monitor Logs / Log Analytics',
@@ -868,6 +950,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'X-Ray',
     awsCostPerMonth: 10,
+    azureCostPerMonth: 10,
+    gcpCostPerMonth: 10,
     cloudEquivalents: {
       aws: 'X-Ray / CloudWatch RUM',
       azure: 'Azure Monitor Application Insights',
@@ -887,6 +971,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'SNS + PagerDuty',
     awsCostPerMonth: 15,
+    azureCostPerMonth: 15,
+    gcpCostPerMonth: 15,
     cloudEquivalents: {
       aws: 'SNS + Lambda / CloudWatch Alarms',
       azure: 'Azure Monitor Alerts / Action Groups',
@@ -913,6 +999,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'SageMaker Endpoint',
     awsCostPerMonth: 200,
+    azureCostPerMonth: 200,
+    gcpCostPerMonth: 200,
     cloudEquivalents: {
       aws: 'SageMaker Inference / Bedrock',
       azure: 'Azure ML Managed Endpoints / AI Studio',
@@ -935,6 +1023,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'SageMaker Training',
     awsCostPerMonth: 500,
+    azureCostPerMonth: 500,
+    gcpCostPerMonth: 500,
     cloudEquivalents: {
       aws: 'SageMaker Training',
       azure: 'Azure ML Compute Clusters',
@@ -956,6 +1046,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'SageMaker Feature Store',
     awsCostPerMonth: 40,
+    azureCostPerMonth: 40,
+    gcpCostPerMonth: 40,
     cloudEquivalents: {
       aws: 'SageMaker Feature Store',
       azure: 'Azure ML Feature Store',
@@ -977,6 +1069,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'OpenSearch (k-NN)',
     awsCostPerMonth: 100,
+    azureCostPerMonth: 100,
+    gcpCostPerMonth: 100,
     cloudEquivalents: {
       aws: 'OpenSearch (k-NN) / Bedrock KB',
       azure: 'Azure AI Search (Vector) / Cosmos DB Vector',
@@ -999,6 +1093,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Personalize',
     awsCostPerMonth: 150,
+    azureCostPerMonth: 150,
+    gcpCostPerMonth: 150,
     cloudEquivalents: {
       aws: 'Personalize / SageMaker RT',
       azure: 'Azure Personalizer / Azure ML',
@@ -1034,6 +1130,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'Custom',
     awsCostPerMonth: 0,
+    azureCostPerMonth: 0,
+    gcpCostPerMonth: 0,
     cloudEquivalents: {
       aws: 'Custom (Any AWS Service)',
       azure: 'Custom (Any Azure Service)',
@@ -1058,6 +1156,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'N/A',
     awsCostPerMonth: 0,
+    azureCostPerMonth: 0,
+    gcpCostPerMonth: 0,
     cloudEquivalents: {
       aws: 'N/A (External)',
       azure: 'N/A (External)',
@@ -1077,6 +1177,8 @@ export const COMPONENT_META: ComponentMeta[] = [
     },
     awsService: 'N/A',
     awsCostPerMonth: 0,
+    azureCostPerMonth: 0,
+    gcpCostPerMonth: 0,
     cloudEquivalents: {
       aws: 'N/A',
       azure: 'N/A',

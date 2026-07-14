@@ -235,6 +235,10 @@ export interface CostEstimate {
   networking: number
   requests: number
   total: number
+  // Multi-cloud costs
+  awsTotal: number
+  azureTotal: number
+  gcpTotal: number
 }
 
 // ── Event Log Types ──
@@ -309,6 +313,8 @@ export interface ComponentMeta {
   defaultConfig: ComponentConfig
   awsService: string
   awsCostPerMonth: number  // base cost
+  azureCostPerMonth: number  // base cost
+  gcpCostPerMonth: number  // base cost
   cloudEquivalents: {
     aws: string
     azure: string
