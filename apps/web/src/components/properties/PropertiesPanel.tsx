@@ -383,14 +383,14 @@ export function PropertiesPanel({ setNodes }: { setNodes: (fn: (nodes: Node[]) =
                       className="w-full px-2 py-1.5 rounded bg-bg border border-border text-[9px] text-text flex items-center justify-between hover:border-accent/50 transition-colors"
                     >
                       <span className="truncate pr-6">
-                        {selectedNode.data.cloudService || meta.cloudEquivalents?.[(selectedNode.data.cloudProvider || 'aws') as keyof typeof meta.cloudEquivalents]?.split(',')[0]?.trim() || 'Select service'}
+                        {selectedNode.data.cloudService || meta.cloudEquivalents?.[(selectedNode.data.cloudProvider || 'aws') as keyof typeof meta.cloudEquivalents]?.split(/[,\/]/)[0]?.trim() || 'Select service'}
                       </span>
                       <ChevronDown className={`w-3 h-3 text-text-dim shrink-0 ${cloudServiceOpen ? 'rotate-180' : ''}`} />
                     </button>
                     
                     {cloudServiceOpen && (
                       <div className="absolute bottom-full left-0 right-0 mb-1 z-50 bg-surface border border-border rounded-lg shadow-2xl overflow-hidden max-h-48 overflow-y-auto">
-                        {meta.cloudEquivalents?.[(selectedNode.data.cloudProvider || 'aws') as keyof typeof meta.cloudEquivalents]?.split(',').map((s: string) => {
+                        {meta.cloudEquivalents?.[(selectedNode.data.cloudProvider || 'aws') as keyof typeof meta.cloudEquivalents]?.split(/[,\/]/).map((s: string) => {
                           const service = s.trim()
                           return (
                             <button
