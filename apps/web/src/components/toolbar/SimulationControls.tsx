@@ -485,6 +485,79 @@ export function SimulationControls() {
               metric: { key: 'rps', value: currentRps, threshold: config.maxRps },
             })
           }
+          // SPOF detection — single instance with no autoscale
+          else if (!config.autoScale && (config.minInstances || 1) <= 1) {
+            const isCompute = ['web_server', 'microservice', 'serverless', 'container_cluster', 'graphql'].includes(node.data.componentType)
+            if (isCompute) {
+              storeRef.addEvent({
+                nodeId: node.id,
+                nodeName: node.data.label,
+                type: 'spof_detected',
+                severity: 'warning',
+                message: `${node.data.label} is a single point of failure`,
+                details: `${node.data.label} runs a single instance with no autoscaling. A failure here will break the entire request path.`,
+              })
+            }
+          }
+          // Database with no replicas
+          else if (node.data.componentType === 'database' && (config.replicationFactor || 1) <= 1) {
+            storeRef.addEvent({
+              nodeId: node.id,
+              nodeName: node.data.label,
+              type: 'spof_detected',
+              severity: 'warning',
+              message: `${node.data.label} has no replicas`,
+              details: `Database running with replicationFactor=1. No read replicas and no failover — a single failure causes full downtime.`,
+            })
+          }
+          // Connection pool exhaustion
+          else if (config.connectionLimit && currentRps > 0) {
+            const connUsage = currentRps / config.connectionLimit
+            if (connUsage > 0.9) {
+              storeRef.addEvent({
+                nodeId: node.id,
+                nodeName: node.data.label,
+                type: 'connection_pool_full',
+                severity: connUsage > 0.98 ? 'critical' : 'warning',
+                message: `${node.data.label} connection pool at ${(connUsage * 100).toFixed(0)}% capacity`,
+                details: `Connection pool near exhaustion: ${currentRps} active connections against limit of ${config.connectionLimit}. New requests may be queued or rejected.`,
+              })
+            }
+          }
+          // Memory pressure
+          else if (config.memoryGb && config.memoryGb < 4) {
+            storeRef.addEvent({
+              nodeId: node.id,
+              nodeName: node.data.label,
+              type: 'memory_pressure',
+              severity: config.memoryGb < 2 ? 'critical' : 'warning',
+              message: `${node.data.label} low memory (${config.memoryGb}GB)`,
+              details: `Component running on only ${config.memoryGb}GB RAM. Under load this risks OOM kills and degraded performance.`,
+            })
+          }
+          // Queue depth (for queues/messaging)
+          else if (config.messageRetentionHours !== undefined && (metrics[node.id]?.queueDepth || 0) > 50) {
+            const qd = metrics[node.id]?.queueDepth || 0
+            storeRef.addEvent({
+              nodeId: node.id,
+              nodeName: node.data.label,
+              type: 'consumer_lag',
+              severity: qd > 80 ? 'critical' : 'warning',
+              message: `${node.data.label} queue depth at ${qd}`,
+              details: `Message queue depth growing: ${qd} pending. Consumers may be falling behind — consider adding consumers or partitioning.`,
+            })
+          }
+          // Node degraded status
+          else if (node.data.status === 'degraded') {
+            storeRef.addEvent({
+              nodeId: node.id,
+              nodeName: node.data.label,
+              type: 'node_degraded',
+              severity: 'warning',
+              message: `${node.data.label} is degraded`,
+              details: `${node.data.label} operating at degraded capacity. Monitor closely and consider scaling or replacing.`,
+            })
+          }
         }
 
         // Update node event stats in store
@@ -494,6 +567,32 @@ export function SimulationControls() {
         else if (utilization > 0.8) store.updateNodeStatus(node.id, 'degraded')
         else store.updateNodeStatus(node.id, 'running')
       })
+
+      // ── Cascading failure detection ──
+      const edges = store.edges
+      const currentTick = store.simTick
+      for (const node of nodes) {
+        if (node.data.status === 'failed') {
+          // Find upstream nodes and check if they're now affected
+          const upstreamEdges = edges.filter(e => e.target === node.id)
+          for (const edge of upstreamEdges) {
+            const upstreamNode = nodes.find(n => n.id === edge.source)
+            if (upstreamNode && upstreamNode.data.status !== 'failed') {
+              const recentCascade = store.events.filter(e => e.nodeId === upstreamNode.id && e.type === 'cascading_failure' && currentTick - e.tick < 5)
+              if (recentCascade.length === 0) {
+                store.addEvent({
+                  nodeId: upstreamNode.id,
+                  nodeName: upstreamNode.data.label,
+                  type: 'cascading_failure',
+                  severity: 'critical',
+                  message: `${upstreamNode.data.label} affected by ${node.data.label} failure`,
+                  details: `Downstream dependency ${node.data.label} has failed. ${upstreamNode.data.label} may be unable to complete requests that depend on it.`,
+                })
+              }
+            }
+          }
+        }
+      }
 
       const prevHistory = store.systemMetrics.latencyHistory
       const newSample = {
