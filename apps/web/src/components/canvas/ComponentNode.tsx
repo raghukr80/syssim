@@ -28,7 +28,9 @@ function ComponentNodeComponent(props: any) {
   // Get cloud provider equivalent service name
   const provider = data.cloudProvider || 'aws'
   const meta = getComponentMeta(data.componentType)
-  const providerService = meta?.cloudEquivalents?.[provider as keyof typeof meta.cloudEquivalents] || ''
+  const allServices = meta?.cloudEquivalents?.[provider as keyof typeof meta.cloudEquivalents] || ''
+  // Show selected cloudService if available, otherwise first from the list
+  const providerService = data.cloudService || allServices.split(/[,\/]/)[0]?.trim() || ''
 
   // Check if this node has active chaos
   const activeChaos = useDiagramStore(s => s.activeChaos)
