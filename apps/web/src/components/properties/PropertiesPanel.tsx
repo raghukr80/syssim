@@ -37,6 +37,9 @@ export function PropertiesPanel({ setNodes }: { setNodes: (fn: (nodes: Node[]) =
   const [iconDropdownOpen, setIconDropdownOpen] = useState(false)
   const iconSearchRef = useRef<HTMLDivElement>(null)
 
+  // Cloud service dropdown state
+  const [cloudServiceOpen, setCloudServiceOpen] = useState(false)
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -336,10 +339,86 @@ export function PropertiesPanel({ setNodes }: { setNodes: (fn: (nodes: Node[]) =
           <div className="flex items-center gap-2">
             <span className="text-base">{meta?.icon}</span>
             <div className="min-w-0">
-              <div className="text-[10px] text-text-dim">{meta?.awsService} · {meta?.category}</div>
+              <div className="text-[10px] text-text-dim">{meta?.category}</div>
             </div>
           </div>
           {meta && <p className="text-[9px] text-text-dim mt-1 leading-relaxed">{meta.description}</p>}
+          
+          {/* Cloud Provider selector */}
+          <div className="mt-2.5">
+            <label className="text-[9px] font-semibold text-text-dim uppercase tracking-wider">Cloud Provider</label>
+            <div className="flex gap-1 mt-1">
+              {(['aws', 'azure', 'gcp', 'oss'] as const).map(p => (
+                <button
+                  key={p}
+                  onClick={() => {
+                    store.updateCloudProvider(selectedNodeId, p)
+                    setNodes(currentNodes =>
+                      currentNodes.map(n =>
+                        n.id === selectedNodeId
+                          ? { ...n, data: { ...n.data, cloudProvider: p, cloudService: undefined } }
+                          : n
+                      )
+                    )
+                  }}
+                  className={`flex-1 px-2 py-1 rounded text-[9px] font-medium transition-colors capitalize ${
+                    (selectedNode.data.cloudProvider || 'aws') === p
+                      ? 'bg-accent text-text border border-accent'
+                      : 'bg-bg text-text-dim border border-border hover:border-accent/50'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+            
+            {/* Cloud Service Selector Dropdown */}
+            {meta && (
+              <div className="mt-2">
+                <label className="text-[9px] font-semibold text-text-dim uppercase tracking-wider">Cloud Service</label>
+                <div className="relative mt-1">
+                  <div className="relative">
+                    <button
+                      onClick={() => setCloudServiceOpen(!cloudServiceOpen)}
+                      className="w-full px-2 py-1.5 rounded bg-bg border border-border text-[9px] text-text flex items-center justify-between hover:border-accent/50 transition-colors"
+                    >
+                      <span className="truncate pr-6">
+                        {selectedNode.data.cloudService || meta.cloudEquivalents?.[(selectedNode.data.cloudProvider || 'aws') as keyof typeof meta.cloudEquivalents]?.split(',')[0]?.trim() || 'Select service'}
+                      </span>
+                      <ChevronDown className={`w-3 h-3 text-text-dim shrink-0 ${cloudServiceOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    
+                    {cloudServiceOpen && (
+                      <div className="absolute bottom-full left-0 right-0 mb-1 z-50 bg-surface border border-border rounded-lg shadow-2xl overflow-hidden max-h-48 overflow-y-auto">
+                        {meta.cloudEquivalents?.[(selectedNode.data.cloudProvider || 'aws') as keyof typeof meta.cloudEquivalents]?.split(',').map((s: string) => {
+                          const service = s.trim()
+                          return (
+                            <button
+                              key={service}
+                              onClick={() => {
+                                store.updateCloudProvider(selectedNodeId, selectedNode.data.cloudProvider || 'aws')
+                                setNodes(currentNodes =>
+                                  currentNodes.map(n =>
+                                    n.id === selectedNodeId
+                                      ? { ...n, data: { ...n.data, cloudService: service } }
+                                      : n
+                                  )
+                                )
+                                setCloudServiceOpen(false)
+                              }}
+                              className={`w-full px-3 py-2 text-[10px] text-left hover:bg-surface-hover transition-colors ${selectedNode.data.cloudService === service ? 'text-accent bg-accent/10' : 'text-text'}`}
+                            >
+                              {service}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Status indicator */}

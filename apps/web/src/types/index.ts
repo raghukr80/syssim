@@ -168,6 +168,8 @@ export interface SimNode {
     tag?: string
     color?: string
     icon?: string
+    cloudProvider?: 'aws' | 'azure' | 'gcp' | 'oss'
+    cloudService?: string
     config: ComponentConfig
     status: 'idle' | 'running' | 'degraded' | 'failed'
     metrics?: ComponentMetrics

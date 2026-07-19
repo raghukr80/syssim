@@ -239,7 +239,7 @@ function ComponentsTab({ onHover, onHoverEnd }: ComponentsTabProps) {
                       <div className="text-xs font-medium text-text truncate">
                         {meta.label}
                       </div>
-                      <div className="text-[10px] text-text-dim truncate">{meta.awsService}</div>
+                      <div className="text-[10px] text-text-dim truncate">{meta.description}</div>
                     </div>
                   </div>
                 </div>

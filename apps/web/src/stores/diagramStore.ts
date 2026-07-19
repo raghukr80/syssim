@@ -67,6 +67,7 @@ interface DiagramStore {
   updateNodeTag: (nodeId: string, tag: string) => void
   updateNodeColor: (nodeId: string, color: string) => void
   updateNodeIcon: (nodeId: string, icon: string) => void
+  updateCloudProvider: (nodeId: string, provider: string) => void
   updateNodeMetrics: (nodeId: string, metrics: SimNode['data']['metrics']) => void
   updateNodeStatus: (nodeId: string, status: SimNode['data']['status']) => void
   removeNodes: (nodeIds: string[]) => void
@@ -204,6 +205,14 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
     set({
       nodes: get().nodes.map(n =>
         n.id === nodeId ? { ...n, data: { ...n.data, icon } } : n
+      ),
+    })
+  },
+
+  updateCloudProvider: (nodeId, provider) => {
+    set({
+      nodes: get().nodes.map(n =>
+        n.id === nodeId ? { ...n, data: { ...n.data, cloudProvider: provider as any } } : n
       ),
     })
   },

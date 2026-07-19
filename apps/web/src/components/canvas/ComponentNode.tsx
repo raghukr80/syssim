@@ -1,6 +1,7 @@
 import { memo, useState, useRef, useEffect } from 'react'
 import { Handle, Position } from '@xyflow/react'
 import { useDiagramStore } from '../../stores/diagramStore'
+import { getComponentMeta } from '../../types/components'
 import { Zap } from 'lucide-react'
 import type { SimNode } from '../../types'
 
@@ -23,6 +24,11 @@ function ComponentNodeComponent(props: any) {
   const statusColor = STATUS_COLORS[data.status] || STATUS_COLORS.idle
   const nodeColor = data.color || DEFAULT_NODE_COLOR
   const metrics = data.metrics
+
+  // Get cloud provider equivalent service name
+  const provider = data.cloudProvider || 'aws'
+  const meta = getComponentMeta(data.componentType)
+  const providerService = meta?.cloudEquivalents?.[provider as keyof typeof meta.cloudEquivalents] || ''
 
   // Check if this node has active chaos
   const activeChaos = useDiagramStore(s => s.activeChaos)
@@ -128,6 +134,9 @@ function ComponentNodeComponent(props: any) {
             {data.tag}
           </div>
         )}
+        
+        {/* Cloud provider service name */}
+        <div className="text-[9px] text-text-dim mt-1 truncate">{providerService}</div>
       </div>
 
       {/* Live metrics when running */}
