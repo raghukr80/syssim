@@ -342,6 +342,8 @@ export default function SimulatorCanvas() {
     e.dataTransfer.dropEffect = 'move'
   }, [])
 
+  const { screenToFlowPosition } = useReactFlow()
+
   const onDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault()
@@ -354,10 +356,10 @@ export default function SimulatorCanvas() {
       const bounds = reactFlowWrapper.current?.getBoundingClientRect()
       if (!bounds) return
 
-      const position = {
-        x: e.clientX - bounds.left - 75,
-        y: e.clientY - bounds.top - 25,
-      }
+      const position = screenToFlowPosition({
+        x: e.clientX - bounds.left,
+        y: e.clientY - bounds.top,
+      })
 
       const newNode: Node = {
         id: genRfId(),
@@ -375,7 +377,7 @@ export default function SimulatorCanvas() {
       setNodes(nds => [...nds, newNode])
       requestAnimationFrame(syncToStore)
     },
-    [setNodes, syncToStore]
+    [setNodes, syncToStore, screenToFlowPosition]
   )
 
   // ── Deselect (close properties panel) ──
