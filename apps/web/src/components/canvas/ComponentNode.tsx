@@ -108,7 +108,6 @@ function ComponentNodeComponent(props: any) {
             <span className="text-sm shrink-0">⚙️</span>
           )}
           <div className="min-w-0 flex-1">
-            <div className="text-[10px] text-text-dim uppercase tracking-wider">{data.componentType.replace(/_/g, ' ')}</div>
             {editing ? (
               <input
                 ref={inputRef}
