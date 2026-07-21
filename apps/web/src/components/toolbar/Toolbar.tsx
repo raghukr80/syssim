@@ -3,6 +3,7 @@ import { useDiagramStore } from '../../stores/diagramStore'
 import { Download, Upload, Undo2, Redo2, Activity, Eraser, LayoutGrid, FolderPlus, FileJson, FileImage, FileText } from 'lucide-react'
 import { BlueprintPanel } from './BlueprintPanel'
 import { CostPanel } from './CostPanel'
+import { ToolsMenu } from '../tools/ToolsMenu'
 import { toPng } from 'html-to-image'
 import { jsPDF } from 'jspdf'
 
@@ -112,6 +113,11 @@ export function Toolbar({ onAddZone }: { onAddZone: () => void }) {
 
       {/* Blueprints */}
       <BlueprintPanel />
+
+      <div className="w-px h-5 bg-border mx-1" />
+
+      {/* System Design Tools */}
+      <ToolsMenu />
 
       <div className="w-px h-5 bg-border mx-1" />
 
