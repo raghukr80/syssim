@@ -47,6 +47,20 @@ function ToolInputField({ input, value, onChange }: {
     );
   }
 
+  if (input.type === 'checkbox') {
+    return (
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          checked={value ?? input.defaultValue ?? false}
+          onChange={(e) => onChange(e.target.checked)}
+          className="w-3.5 h-3.5 rounded border-border text-accent focus:ring-accent"
+        />
+        <label className="text-[10px] text-text-dim cursor-pointer">{input.label}</label>
+      </div>
+    );
+  }
+
   return (
     <div>
       <label className="text-[10px] font-medium text-text-dim mb-1 block">{input.label}</label>

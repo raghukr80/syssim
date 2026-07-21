@@ -380,6 +380,255 @@ export const TOOL_REGISTRY: Tool[] = [
     },
     tags: ['database', 'selection', 'architecture', 'decision'],
   },
+  {
+    id: 'adr-builder',
+    name: 'Architecture Decision Records',
+    shortName: 'ADR Builder',
+    description: 'Create and manage Architecture Decision Records with templates and trade-offs',
+    category: 'architecture',
+    difficulty: 'intermediate',
+    estimatedTimeMinutes: 15,
+    icon: '📝',
+    color: 'text-purple-400',
+    inputs: [
+      { key: 'title', label: 'Decision Title', type: 'text', defaultValue: '', required: true, placeholder: 'e.g., Choose message broker for event streaming' },
+      { key: 'status', label: 'Status', type: 'select', defaultValue: 'proposed', options: [
+        { value: 'proposed', label: 'Proposed' },
+        { value: 'accepted', label: 'Accepted' },
+        { value: 'deprecated', label: 'Deprecated' },
+        { value: 'superseded', label: 'Superseded' },
+      ]},
+      { key: 'context', label: 'Context', type: 'text', defaultValue: '', required: true, placeholder: 'What is the issue that motivates this decision?' },
+      { key: 'options', label: 'Options Considered', type: 'text', defaultValue: '', placeholder: 'List alternatives with pros/cons' },
+      { key: 'decision', label: 'Decision', type: 'text', defaultValue: '', required: true, placeholder: 'What was decided?' },
+      { key: 'consequences', label: 'Consequences', type: 'text', defaultValue: '', placeholder: 'Trade-offs, risks, follow-up work' },
+    ],
+    outputs: [
+      { key: 'adrMarkdown', label: 'Generated ADR (Markdown)', type: 'text' },
+      { key: 'wordCount', label: 'Word Count', type: 'number' },
+    ],
+    compute: (inputs) => {
+      const date = new Date().toISOString().split('T')[0];
+      const adr = `# ADR: ${inputs.title || 'Untitled Decision'}\n\n**Status:** ${inputs.status}\n**Date:** ${date}\n\n## Context\n${inputs.context || 'No context provided.'}\n\n## Decision\n${inputs.decision || 'No decision recorded.'}\n\n## Options Considered\n${inputs.options || 'None listed.'}\n\n## Consequences\n${inputs.consequences || 'None listed.'}\n`;
+      return {
+        adrMarkdown: adr,
+        wordCount: adr.split(/\s+/).filter(Boolean).length,
+      };
+    },
+    tags: ['adr', 'architecture', 'decision', 'documentation'],
+  },
+  {
+    id: 'api-design-builder',
+    name: 'API Design Builder',
+    shortName: 'API Builder',
+    description: 'Design REST/GraphQL/gRPC APIs with OpenAPI/Swagger export',
+    category: 'architecture',
+    difficulty: 'intermediate',
+    estimatedTimeMinutes: 15,
+    icon: '🔌',
+    color: 'text-purple-400',
+    inputs: [
+      { key: 'apiType', label: 'API Type', type: 'select', defaultValue: 'rest', required: true, options: [
+        { value: 'rest', label: 'REST' },
+        { value: 'graphql', label: 'GraphQL' },
+        { value: 'grpc', label: 'gRPC' },
+      ]},
+      { key: 'serviceName', label: 'Service Name', type: 'text', defaultValue: 'orders-api', required: true },
+      { key: 'version', label: 'Version', type: 'text', defaultValue: 'v1' },
+      { key: 'endpoints', label: 'Endpoints (JSON)', type: 'text', defaultValue: JSON.stringify([
+        { method: 'GET', path: '/orders', description: 'List orders' },
+        { method: 'POST', path: '/orders', description: 'Create order' },
+        { method: 'GET', path: '/orders/{id}', description: 'Get order' },
+      ], null, 2), placeholder: 'Array of {method, path, description}' },
+    ],
+    outputs: [
+      { key: 'openapiYaml', label: 'OpenAPI Spec (YAML)', type: 'text' },
+      { key: 'endpointCount', label: 'Endpoint Count', type: 'number' },
+    ],
+    compute: (inputs) => {
+      let endpoints: any[] = [];
+      try { endpoints = JSON.parse(inputs.endpoints as string || '[]'); } catch { endpoints = []; }
+      const paths: Record<string, any> = {};
+      endpoints.forEach((ep, i) => {
+        const key = ep.path || `/endpoint${i}`;
+        paths[key] = paths[key] || {};
+        paths[key][(ep.method || 'get').toLowerCase()] = {
+          summary: ep.description || key,
+          responses: { '200': { description: 'Success' } },
+        };
+      });
+      const openapi = {
+        openapi: '3.0.3',
+        info: { title: inputs.serviceName, version: inputs.version },
+        paths,
+      };
+      return {
+        openapiYaml: JSON.stringify(openapi, null, 2),
+        endpointCount: endpoints.length,
+      };
+    },
+    tags: ['api', 'rest', 'graphql', 'grpc', 'openapi', 'swagger'],
+  },
+  {
+    id: 'message-queue-designer',
+    name: 'Message Queue Designer',
+    shortName: 'MQ Designer',
+    description: 'Design message queue topologies and compare brokers',
+    category: 'architecture',
+    difficulty: 'intermediate',
+    estimatedTimeMinutes: 15,
+    icon: '📨',
+    color: 'text-purple-400',
+    inputs: [
+      { key: 'pattern', label: 'Messaging Pattern', type: 'select', defaultValue: 'pubsub', required: true, options: [
+        { value: 'pubsub', label: 'Pub/Sub (broadcast)' },
+        { value: 'queue', label: 'Work Queue (competing consumers)' },
+        { value: 'stream', label: 'Event Stream (ordered, replayable)' },
+        { value: 'deadletter', label: 'Dead Letter Queue' },
+      ]},
+      { key: 'throughput', label: 'Throughput (msg/sec)', type: 'number', defaultValue: 10000 },
+      { key: 'latencyReq', label: 'Latency Requirement', type: 'select', defaultValue: 'low', options: [
+        { value: 'realtime', label: 'Real-time (< 10ms)' },
+        { value: 'low', label: 'Low (< 100ms)' },
+        { value: 'batch', label: 'Batch (seconds-minutes)' },
+      ]},
+      { key: 'ordering', label: 'Ordering Required', type: 'checkbox', defaultValue: false },
+      { key: 'retention', label: 'Retention Period', type: 'select', defaultValue: 'days', options: [
+        { value: 'none', label: 'No retention (fire & forget)' },
+        { value: 'hours', label: 'Hours' },
+        { value: 'days', label: 'Days' },
+        { value: 'weeks', label: 'Weeks' },
+        { value: 'months', label: 'Months/Years' },
+      ]},
+    ],
+    outputs: [
+      { key: 'recommendedBroker', label: 'Recommended Broker', type: 'text' },
+      { key: 'topologyDiagram', label: 'Topology (Mermaid)', type: 'text' },
+      { key: 'alternatives', label: 'Alternative Brokers', type: 'text' },
+    ],
+    compute: (inputs) => {
+      const pattern = inputs.pattern as string;
+      const throughput = inputs.throughput as number;
+      const latency = inputs.latencyReq as string;
+      const ordering = inputs.ordering as boolean;
+      const retention = inputs.retention as string;
+
+      let recommended = '';
+      let alternatives = '';
+      let topology = '';
+
+      if (pattern === 'pubsub') {
+        if (throughput > 100000) {
+          recommended = 'Apache Pulsar / Kafka';
+          alternatives = 'NATS JetStream, Redpanda';
+        } else if (throughput > 10000) {
+          recommended = 'Kafka / RabbitMQ (with plugins)';
+          alternatives = 'Pulsar, NATS';
+        } else {
+          recommended = 'RabbitMQ / NATS';
+          alternatives = 'Redis Pub/Sub, Google Pub/Sub';
+        }
+        topology = `graph LR\n  P[Publisher] --> T[Topic/Exchange]\n  T --> S1[Subscriber 1]\n  T --> S2[Subscriber 2]\n  T --> S3[Subscriber 3]`;
+      } else if (pattern === 'queue') {
+        if (ordering) {
+          recommended = 'Kafka / SQS FIFO';
+          alternatives = 'RabbitMQ (single consumer), Pulsar';
+        } else {
+          recommended = 'RabbitMQ / SQS / Redis Streams';
+          alternatives = 'Kafka, NATS JetStream';
+        }
+        topology = `graph LR\n  P[Producer] --> Q[Queue]\n  Q --> C1[Consumer 1]\n  Q --> C2[Consumer 2]\n  Q --> C3[Consumer 3]`;
+      } else if (pattern === 'stream') {
+        if (retention === 'months' || retention === 'weeks') {
+          recommended = 'Kafka / Pulsar / Redpanda';
+          alternatives = 'EventStoreDB, NATS JetStream';
+        } else {
+          recommended = 'Kafka / Redis Streams';
+          alternatives = 'Pulsar, NATS JetStream';
+        }
+        topology = `graph LR\n  P[Producer] --> S[Stream/Log]\n  S --> CG1[Consumer Group A]\n  S --> CG2[Consumer Group B]`;
+      } else {
+        recommended = 'RabbitMQ / SQS (with DLQ)';
+        alternatives = 'Kafka (with dead letter topic)';
+        topology = `graph LR\n  P[Producer] --> Q[Main Queue]\n  Q -->|failed| DLQ[Dead Letter Queue]\n  Q --> C[Consumer]`;
+      }
+
+      if (latency === 'realtime' && !recommended.includes('NATS')) {
+        alternatives = 'NATS, ' + alternatives;
+      }
+
+      return { recommendedBroker: recommended, topologyDiagram: topology, alternatives };
+    },
+    tags: ['messaging', 'queue', 'pubsub', 'kafka', 'rabbitmq', 'architecture'],
+  },
+  {
+    id: 'scalability-planner',
+    name: 'Scalability Planning Tool',
+    shortName: 'Scalability',
+    description: 'Identify bottlenecks and plan horizontal/vertical scaling strategies',
+    category: 'architecture',
+    difficulty: 'advanced',
+    estimatedTimeMinutes: 20,
+    icon: '📈',
+    color: 'text-purple-400',
+    inputs: [
+      { key: 'currentQps', label: 'Current QPS', type: 'number', defaultValue: 1000, required: true },
+      { key: 'targetQps', label: 'Target QPS', type: 'number', defaultValue: 10000, required: true },
+      { key: 'cpuUtil', label: 'Current CPU Utilization (%)', type: 'number', defaultValue: 60, min: 0, max: 100 },
+      { key: 'memUtil', label: 'Current Memory Utilization (%)', type: 'number', defaultValue: 50, min: 0, max: 100 },
+      { key: 'dbUtil', label: 'Database Utilization (%)', type: 'number', defaultValue: 40, min: 0, max: 100 },
+      { key: 'stateless', label: 'Service is Stateless', type: 'checkbox', defaultValue: true },
+    ],
+    outputs: [
+      { key: 'scaleFactor', label: 'Scale Factor', type: 'number' },
+      { key: 'horizontalInstances', label: 'Horizontal Instances Needed', type: 'number' },
+      { key: 'bottleneck', label: 'Primary Bottleneck', type: 'text' },
+      { key: 'strategy', label: 'Recommended Strategy', type: 'text' },
+      { key: 'verticalNeeded', label: 'Vertical Scaling Needed', type: 'text' },
+    ],
+    compute: (inputs) => {
+      const scaleFactor = (inputs.targetQps as number) / (inputs.currentQps as number);
+      const cpuHeadroom = 100 - (inputs.cpuUtil as number);
+      const memHeadroom = 100 - (inputs.memUtil as number);
+      const dbHeadroom = 100 - (inputs.dbUtil as number);
+
+      let bottleneck = '';
+      let strategy = '';
+      let verticalNeeded = 'No';
+      let horizontalInstances = 1;
+
+      if (dbHeadroom < 30) {
+        bottleneck = 'Database';
+        strategy = 'Read replicas, sharding, caching, or move to distributed SQL';
+        verticalNeeded = 'Consider larger DB instance';
+      } else if (cpuHeadroom < 30) {
+        bottleneck = 'CPU';
+        strategy = inputs.stateless ? 'Horizontal scaling (add instances)' : 'Vertical scaling or refactor for statelessness';
+        horizontalInstances = Math.ceil(scaleFactor * (inputs.cpuUtil as number) / 70);
+      } else if (memHeadroom < 30) {
+        bottleneck = 'Memory';
+        strategy = 'Vertical scaling or optimize memory usage (caching, connection pooling)';
+        verticalNeeded = 'Larger instance with more RAM';
+      } else {
+        bottleneck = 'Network / Other';
+        strategy = 'Horizontal scaling likely sufficient';
+        horizontalInstances = Math.ceil(scaleFactor);
+      }
+
+      if (inputs.stateless && bottleneck !== 'Database') {
+        horizontalInstances = Math.max(horizontalInstances, Math.ceil(scaleFactor * 0.8));
+      }
+
+      return {
+        scaleFactor: Math.round(scaleFactor * 100) / 100,
+        horizontalInstances,
+        bottleneck,
+        strategy,
+        verticalNeeded,
+      };
+    },
+    tags: ['scalability', 'bottleneck', 'horizontal-scaling', 'vertical-scaling', 'architecture'],
+  },
 
   // ─── RELIABILITY & RESILIENCE ────────────────────────────
   {
