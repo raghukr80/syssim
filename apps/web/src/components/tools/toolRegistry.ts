@@ -1090,6 +1090,204 @@ export const TOOL_REGISTRY: Tool[] = [
     },
     tags: ['sharding', 'database', 'partitioning', 'consistent-hash', 'distribution'],
   },
+  {
+    id: 'consistency-model-explorer',
+    name: 'Consistency Model Explorer',
+    shortName: 'Consistency',
+    description: 'Explore consistency models from linearizable to eventual with anomaly visualization',
+    category: 'architecture',
+    difficulty: 'advanced',
+    estimatedTimeMinutes: 15,
+    icon: '🔍',
+    color: 'text-purple-400',
+    inputs: [
+      { key: 'model', label: 'Consistency Model', type: 'select', defaultValue: 'eventual', required: true, options: [
+        { value: 'linearizable', label: 'Linearizable (strict)' },
+        { value: 'sequential', label: 'Sequential' },
+        { value: 'causal', label: 'Causal' },
+        { value: 'readYourWrites', label: 'Read Your Writes' },
+        { value: 'monotonicReads', label: 'Monotonic Reads' },
+        { value: 'eventual', label: 'Eventual' },
+      ]},
+      { key: 'replicas', label: 'Number of Replicas', type: 'number', defaultValue: 3, min: 2, max: 10 },
+      { key: 'networkDelay', label: 'Network Delay (ms)', type: 'number', defaultValue: 100, min: 1, max: 10000 },
+      { key: 'partition', label: 'Network Partition?', type: 'checkbox', defaultValue: false },
+      { key: 'ops', label: 'Operations to Simulate', type: 'number', defaultValue: 20, min: 5, max: 100 },
+    ],
+    outputs: [
+      { key: 'timeline', label: 'Operation Timeline', type: 'text' },
+      { key: 'anomalies', label: 'Anomalies Detected', type: 'text' },
+      { key: 'staleReads', label: 'Stale Reads', type: 'number' },
+      { key: 'writeConflicts', label: 'Write Conflicts', type: 'number' },
+      { key: 'consistencyViolations', label: 'Consistency Violations', type: 'number' },
+      { key: 'modelDescription', label: 'Model Description', type: 'text' },
+    ],
+    compute: (inputs) => {
+      const model = inputs.model as string;
+      const replicas = inputs.replicas as number;
+      const delay = inputs.networkDelay as number;
+      const partitioned = inputs.partition as boolean;
+      const opsCount = inputs.ops as number;
+
+      const timeline: string[] = [];
+      let staleReads = 0;
+      let writeConflicts = 0;
+      let consistencyViolations = 0;
+      const replicaVersions = new Array(replicas).fill(0);
+      const buildOrder: number[] = [];
+
+      const propagateToAll = partitioned 
+        ? (idx: number) => replicaVersions[Math.min(idx + 1, replicas - 1)] = replicaVersions[idx]
+        : () => {}; // full sync is instant for non-partitioned
+
+      for (let i = 0; i < opsCount; i++) {
+        const isWrite = Math.random() < 0.5;
+        const replica = Math.floor(Math.random() * replicas);
+
+        if (isWrite) {
+          replicaVersions[replica]++;
+          buildOrder.push(replica);
+          const propagationDelay = partitioned ? delay * 3 : delay;
+          timeline.push(`T${i}: WRITE on R${replica} (v${replicaVersions[replica]}, propagation: ${propagationDelay}ms)`);
+          writeConflicts += partitioned && replicaVersions.some(v => v !== replicaVersions[replica]) ? 1 : 0;
+        } else {
+          const currentVersion = replicaVersions[replica];
+          const latestVersion = Math.max(...replicaVersions);
+          
+          if (model === 'linearizable') {
+            consistencyViolations += currentVersion < latestVersion ? 1 : 0;
+          } else if (model === 'sequential') {
+            consistencyViolations += currentVersion < latestVersion - 1 ? 1 : 0;
+          } else if (model === 'readYourWrites') {
+            const lastWriteReplica = buildOrder.filter(r => r === replica).length;
+            consistencyViolations += currentVersion < lastWriteReplica ? 1 : 0;
+          } else if (model === 'causal') {
+            consistencyViolations += currentVersion < latestVersion - 2 ? 1 : 0;
+          } else if (model === 'monotonicReads') {
+            consistencyViolations += currentVersion > 0 && Math.random() < 0.3 ? 1 : 0;
+          }
+
+          staleReads += currentVersion < latestVersion ? 1 : 0;
+          timeline.push(`T${i}: READ  on R${replica} (got v${currentVersion}, latest v${latestVersion})`);
+        }
+      }
+
+      const descriptions: Record<string, string> = {
+        linearizable: 'Strongest: every operation appears to execute atomically at a single point in time. All replicas agree on order.',
+        sequential: 'All operations appear in a single total order, but actual execution points may differ across replicas.',
+        causal: 'Causally-related operations are seen in order; concurrent operations may appear in any order across replicas.',
+        readYourWrites: 'A client always reads its own writes, but may see stale data from other clients.',
+        monotonicReads: 'A client never sees a version older than one it has already seen.',
+        eventual: 'Weakest: replicas eventually converge to the same state if no new writes occur. Stale reads are common.',
+      };
+
+      const anomalies = [];
+      if (staleReads > 0) anomalies.push('stale reads');
+      if (writeConflicts > 0) anomalies.push('write conflicts');
+      if (consistencyViolations > 0) anomalies.push('consistency violations');
+
+      return {
+        timeline: timeline.join('\n'),
+        anomalies: anomalies.join(', ') || 'none',
+        staleReads,
+        writeConflicts,
+        consistencyViolations,
+        modelDescription: descriptions[model] || '',
+      };
+    },
+    tags: ['consistency', 'linearizable', 'eventual', 'causal', 'cap', 'distributed-systems'],
+  },
+  {
+    id: 'microservices-decomposer',
+    name: 'Microservices Decomposer',
+    shortName: 'Microservices',
+    description: 'Decompose a monolith using domain-driven design with bounded contexts and service boundaries',
+    category: 'architecture',
+    difficulty: 'advanced',
+    estimatedTimeMinutes: 20,
+    icon: '🧩',
+    color: 'text-purple-400',
+    inputs: [
+      { key: 'domain', label: 'Domain (e.g., e-commerce, banking)', type: 'select', defaultValue: 'ecommerce', required: true, options: [
+        { value: 'ecommerce', label: 'E-Commerce' },
+        { value: 'banking', label: 'Banking / Fintech' },
+        { value: 'social', label: 'Social Media' },
+        { value: 'logistics', label: 'Logistics / Delivery' },
+        { value: 'healthcare', label: 'Healthcare' },
+        { value: 'streaming', label: 'Video Streaming' },
+      ]},
+      { key: 'decompositionStyle', label: 'Decomposition Approach', type: 'select', defaultValue: 'boundedContext', required: true, options: [
+        { value: 'boundedContext', label: 'By Bounded Context (DDD)' },
+        { value: 'businessCapability', label: 'By Business Capability' },
+        { value: 'subdomain', label: 'By Subdomain' },
+      ]},
+      { key: 'teamSize', label: 'Team Size (Two-Pizza Teams)', type: 'number', defaultValue: 6, min: 3, max: 15 },
+      { key: 'includeDataStores', label: 'Database per Service', type: 'checkbox', defaultValue: true },
+    ],
+    outputs: [
+      { key: 'services', label: 'Proposed Services', type: 'text' },
+      { key: 'serviceCount', label: 'Total Services', type: 'number' },
+      { key: 'boundedContexts', label: 'Bounded Contexts', type: 'text' },
+      { key: 'communicationMap', label: 'Communication Patterns', type: 'text' },
+      { key: 'antiPatterns', label: 'Anti-Patterns to Avoid', type: 'text' },
+    ],
+    compute: (inputs) => {
+      const domain = inputs.domain as string;
+      const style = inputs.decompositionStyle as string;
+
+      const domainServices: Record<string, { services: string[]; contexts: string[]; comms: string[]; anti: string[] }> = {
+        ecommerce: {
+          services: ['Product Catalog', 'Order Management', 'Payment Service', 'Inventory', 'Shipping', 'User Auth', 'Notification', 'Recommendation Engine'],
+          contexts: ['Catalog Context', 'Order Context', 'Payment Context', 'Fulfillment Context', 'Customer Context'],
+          comms: ['Order → Payment: async (events)', 'Order → Inventory: sync (reserve stock)', 'Order → Shipping: async (events)', 'Catalog → Recommendation: async (data feed)'],
+          anti: ['Don\'t create a "shared data" service', 'Avoid distributed transactions across Order+Payment', 'Don\'t split Product Catalog too fine-grained'],
+        },
+        banking: {
+          services: ['Account Management', 'Transaction Processing', 'Fraud Detection', 'Loan Origination', 'Customer Onboarding', 'Reporting & Analytics', 'Compliance Engine'],
+          contexts: ['Core Banking', 'Risk & Compliance', 'Customer Management', 'Product (Loans/Accounts)', 'Regulatory Reporting'],
+          comms: ['Transaction → Fraud: async (events)', 'Transaction → Accounts: sync (balance check)', 'Loan → Compliance: async (audit trail)'],
+          anti: ['Don\'t expose raw transactions across services', 'Avoid sync calls for non-critical flows', 'Keep regulatory data in isolated context'],
+        },
+        social: {
+          services: ['User Profile', 'Feed Service', 'Post/Content Service', 'Notification', 'Messaging', 'Search', 'Analytics', 'Media Storage'],
+          contexts: ['User Context', 'Content Context', 'Social Graph Context', 'Engagement Context', 'Media Context'],
+          comms: ['Post → Feed: async (fan-out)', 'User → Messaging: sync', 'Content → Search: async (indexing)'],
+          anti: ['Don\'t make Feed pull from User+Post directly', 'Avoid tight coupling between Post and Notification', 'Don\'t share DB between Feed and Content'],
+        },
+        logistics: {
+          services: ['Order Intake', 'Route Optimization', 'Driver Management', 'Tracking', 'Warehouse', 'Pricing Engine'],
+          contexts: ['Dispatch Context', 'Inventory Context', 'Pricing Context', 'Driver Context'],
+          comms: ['Order → Route: async (batch)', 'Route → Driver: sync (assignment)', 'Tracking → Order: async (status updates)'],
+          anti: ['Don\'t couple Route Optimization to single warehouse', 'Avoid real-time sync for non-critical updates'],
+        },
+        healthcare: {
+          services: ['Patient Records', 'Appointment Scheduling', 'Billing', 'Lab Results', 'Prescription', 'Insurance Verification'],
+          contexts: ['Clinical Context', 'Administrative Context', 'Billing Context', 'Pharmacy Context'],
+          comms: ['Patient → Lab: async (results)', 'Appointment → Billing: async (claims)', 'Prescription → Pharmacy: async (orders)'],
+          anti: ['Don\'t share raw PHI across contexts without transformation', 'Avoid sync calls for HIPAA-sensitive data', 'Keep audit logs per context'],
+        },
+        streaming: {
+          services: ['Content Catalog', 'Video Ingestion', 'Transcoding Pipeline', 'Player Service', 'Recommendation', 'User Management', 'CDN Edge', 'Analytics'],
+          contexts: ['Content Context', 'Playback Context', 'Personalization Context', 'Delivery Context'],
+          comms: ['Ingestion → Transcoding: async (jobs)', 'Transcoding → CDN: async (distribution)', 'Player → Recommendation: async (events)'],
+          anti: ['Don\'t couple Player to Transcoding directly', 'Avoid sync recommendations in playback path'],
+        },
+      };
+
+      const ds = domainServices[domain] || domainServices.ecommerce;
+      const teamSize = inputs.teamSize as number;
+      const idealServiceCount = Math.min(ds.services.length, Math.ceil(ds.services.length * 6 / teamSize));
+
+      return {
+        services: ds.services.slice(0, idealServiceCount).join('\n'),
+        serviceCount: idealServiceCount,
+        boundedContexts: ds.contexts.join('\n'),
+        communicationMap: ds.comms.join('\n'),
+        antiPatterns: ds.anti.join('\n'),
+      };
+    },
+    tags: ['microservices', 'ddd', 'bounded-context', 'decomposition', 'architecture'],
+  },
 
   // ─── RELIABILITY & RESILIENCE ────────────────────────────
   {
