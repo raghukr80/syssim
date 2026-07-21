@@ -629,6 +629,467 @@ export const TOOL_REGISTRY: Tool[] = [
     },
     tags: ['scalability', 'bottleneck', 'horizontal-scaling', 'vertical-scaling', 'architecture'],
   },
+  {
+    id: 'cache-simulator',
+    name: 'Cache Strategy Simulator',
+    shortName: 'Cache Sim',
+    description: 'Simulate cache hit rates and eviction policies with workload traces',
+    category: 'performance',
+    difficulty: 'intermediate',
+    estimatedTimeMinutes: 15,
+    icon: '💾',
+    color: 'text-yellow-400',
+    inputs: [
+      { key: 'cacheSize', label: 'Cache Size (MB)', type: 'number', defaultValue: 100, required: true },
+      { key: 'itemSizeKB', label: 'Avg Item Size (KB)', type: 'number', defaultValue: 10, required: true },
+      { key: 'workloadType', label: 'Workload Pattern', type: 'select', defaultValue: 'zipf', required: true, options: [
+        { value: 'uniform', label: 'Uniform (random)' },
+        { value: 'zipf', label: 'Zipfian (80/20)' },
+        { value: 'sequential', label: 'Sequential' },
+        { value: 'looping', label: 'Looping (small hot set)' },
+      ]},
+      { key: 'zipfParam', label: 'Zipf Parameter (s)', type: 'number', defaultValue: 1.0, min: 0.5, max: 2.0, step: 0.1 },
+      { key: 'evictionPolicy', label: 'Eviction Policy', type: 'select', defaultValue: 'lru', required: true, options: [
+        { value: 'lru', label: 'LRU (Least Recently Used)' },
+        { value: 'lfu', label: 'LFU (Least Frequently Used)' },
+        { value: 'fifo', label: 'FIFO (First In First Out)' },
+        { value: 'random', label: 'Random' },
+      ]},
+      { key: 'requests', label: 'Total Requests', type: 'number', defaultValue: 100000, min: 1000, max: 10000000 },
+    ],
+    outputs: [
+      { key: 'hitRate', label: 'Hit Rate', type: 'number', unit: '%' },
+      { key: 'missRate', label: 'Miss Rate', type: 'number', unit: '%' },
+      { key: 'capacityItems', label: 'Max Items in Cache', type: 'number' },
+      { key: 'hotSetSize', label: 'Estimated Hot Set Size', type: 'number' },
+      { key: 'recommendation', label: 'Recommendation', type: 'text' },
+    ],
+    compute: (inputs) => {
+      const cacheSize = (inputs.cacheSize as number) * 1024; // KB
+      const itemSize = inputs.itemSizeKB as number;
+      const capacity = Math.floor(cacheSize / itemSize);
+      const workload = inputs.workloadType as string;
+      const s = inputs.zipfParam as number;
+
+      // Simple hit rate estimation based on workload and capacity
+      let hitRate = 0;
+      const hotSetEstimate = Math.floor(capacity * 0.2); // rough estimate
+
+      if (workload === 'uniform') {
+        hitRate = Math.min(capacity / 1000, 0.99) * 100;
+      } else if (workload === 'zipf') {
+        // Zipf: top items get most requests
+        // Hit rate roughly = capacity^(1-s) for Zipf
+        const alpha = 1 - s;
+        if (alpha > 0) {
+          hitRate = Math.min(100 * Math.pow(capacity / 10000, alpha) * 20, 99);
+        } else {
+          hitRate = Math.min(99, 10 + capacity * 0.05);
+        }
+      } else if (workload === 'sequential') {
+        hitRate = capacity > 1000 ? 5 : 0; // very poor for sequential
+      } else if (workload === 'looping') {
+        hitRate = capacity > 100 ? 95 : 50;
+      }
+
+      // Policy adjustments
+      if (inputs.evictionPolicy === 'lfu') hitRate *= 1.05;
+      else if (inputs.evictionPolicy === 'fifo') hitRate *= 0.95;
+      else if (inputs.evictionPolicy === 'random') hitRate *= 0.9;
+
+      hitRate = Math.min(99, Math.max(0, hitRate));
+
+      let recommendation = '';
+      if (hitRate < 50) recommendation = 'Increase cache size or use tiered caching';
+      else if (hitRate < 80) recommendation = 'Consider larger cache or better eviction policy';
+      else if (hitRate < 95) recommendation = 'Good hit rate; monitor for changes';
+      else recommendation = 'Excellent hit rate';
+
+      return {
+        hitRate: Math.round(hitRate * 100) / 100,
+        missRate: Math.round((100 - hitRate) * 100) / 100,
+        capacityItems: capacity,
+        hotSetSize: hotSetEstimate,
+        recommendation,
+      };
+    },
+    tags: ['cache', 'simulation', 'lru', 'lfu', 'zipf', 'performance'],
+  },
+  {
+    id: 'load-balancer-visualizer',
+    name: 'Load Balancer Visualizer',
+    shortName: 'LB Visualizer',
+    description: 'Compare load balancing algorithms with visual request distribution',
+    category: 'performance',
+    difficulty: 'intermediate',
+    estimatedTimeMinutes: 10,
+    icon: '⚖️',
+    color: 'text-yellow-400',
+    inputs: [
+      { key: 'algorithm', label: 'Algorithm', type: 'select', defaultValue: 'roundrobin', required: true, options: [
+        { value: 'roundrobin', label: 'Round Robin' },
+        { value: 'leastconn', label: 'Least Connections' },
+        { value: 'iphash', label: 'IP Hash' },
+        { value: 'consistent', label: 'Consistent Hash' },
+        { value: 'weighted', label: 'Weighted Round Robin' },
+      ]},
+      { key: 'servers', label: 'Number of Servers', type: 'number', defaultValue: 4, min: 2, max: 20 },
+      { key: 'requests', label: 'Total Requests', type: 'number', defaultValue: 100, min: 10, max: 10000 },
+      { key: 'weights', label: 'Server Weights (comma-separated)', type: 'text', defaultValue: '1,1,1,1', placeholder: 'e.g., 2,1,3,1' },
+      { key: 'ipVariance', label: 'Client IP Diversity', type: 'select', defaultValue: 'high', options: [
+        { value: 'low', label: 'Low (few unique IPs)' },
+        { value: 'medium', label: 'Medium' },
+        { value: 'high', label: 'High (many unique IPs)' },
+      ]},
+    ],
+    outputs: [
+      { key: 'distribution', label: 'Request Distribution', type: 'text' },
+      { key: 'variance', label: 'Load Variance', type: 'number' },
+      { key: 'fairnessScore', label: 'Fairness Score (0-100)', type: 'number' },
+      { key: 'visualization', label: 'Distribution Bar Chart', type: 'text' },
+    ],
+    compute: (inputs) => {
+      const algorithm = inputs.algorithm as string;
+      const serverCount = inputs.servers as number;
+      const totalRequests = inputs.requests as number;
+      const weights = (inputs.weights as string).split(',').map(Number).filter(n => !isNaN(n));
+      const ipVariance = inputs.ipVariance as string;
+
+      // Simulate distribution
+      const counts = new Array(serverCount).fill(0);
+
+      if (algorithm === 'roundrobin') {
+        for (let i = 0; i < totalRequests; i++) {
+          counts[i % serverCount]++;
+        }
+      } else if (algorithm === 'leastconn') {
+        for (let i = 0; i < totalRequests; i++) {
+          const min = Math.min(...counts);
+          const idx = counts.indexOf(min);
+          counts[idx]++;
+        }
+      } else if (algorithm === 'iphash') {
+        const uniqueIPs = ipVariance === 'high' ? 1000 : ipVariance === 'medium' ? 100 : 10;
+        for (let i = 0; i < totalRequests; i++) {
+          const ip = i % uniqueIPs;
+          const idx = ip % serverCount;
+          counts[idx]++;
+        }
+      } else if (algorithm === 'consistent') {
+        for (let i = 0; i < totalRequests; i++) {
+          // Simplified consistent hashing
+          const hash = ((i * 1103515245 + 12345) >>> 0) % serverCount;
+          counts[hash]++;
+        }
+      } else if (algorithm === 'weighted') {
+        const totalWeight = weights.reduce((a, b) => a + b, 0);
+        const targetCounts = weights.map(w => Math.round((w / totalWeight) * totalRequests));
+        let remaining = totalRequests - targetCounts.reduce((a, b) => a + b, 0);
+        for (let i = 0; i < serverCount && remaining > 0; i++) {
+          targetCounts[i]++;
+          remaining--;
+        }
+        for (let i = 0; i < serverCount; i++) {
+          counts[i] = targetCounts[i];
+        }
+      }
+
+      const avg = totalRequests / serverCount;
+      const variance = counts.reduce((sum, c) => sum + Math.pow(c - avg, 2), 0) / serverCount;
+      const fairnessScore = Math.max(0, 100 - (variance / avg) * 100);
+
+      // Visualization bar chart
+      const maxCount = Math.max(...counts);
+      const bars = counts.map((c, i) => {
+        const barLen = Math.round((c / maxCount) * 30);
+        return `S${i + 1}: ${'█'.repeat(barLen)} ${c}`;
+      }).join('\n');
+
+      return {
+        distribution: counts.join(', '),
+        variance: Math.round(variance * 100) / 100,
+        fairnessScore: Math.round(fairnessScore * 100) / 100,
+        visualization: bars,
+      };
+    },
+    tags: ['load-balancer', 'round-robin', 'least-connections', 'consistent-hash', 'visualization'],
+  },
+  {
+    id: 'rate-limit-tester',
+    name: 'Rate Limit Tester',
+    shortName: 'Rate Limit',
+    description: 'Test and visualize token bucket, leaky bucket, and sliding window algorithms',
+    category: 'reliability',
+    difficulty: 'intermediate',
+    estimatedTimeMinutes: 10,
+    icon: '🚦',
+    color: 'text-red-400',
+    inputs: [
+      { key: 'algorithm', label: 'Algorithm', type: 'select', defaultValue: 'tokenbucket', required: true, options: [
+        { value: 'tokenbucket', label: 'Token Bucket' },
+        { value: 'leakybucket', label: 'Leaky Bucket' },
+        { value: 'slidingwindow', label: 'Sliding Window' },
+        { value: 'fixedwindow', label: 'Fixed Window' },
+      ]},
+      { key: 'rate', label: 'Rate Limit (req/sec)', type: 'number', defaultValue: 10, required: true },
+      { key: 'burst', label: 'Burst Capacity (tokens/bucket size)', type: 'number', defaultValue: 20 },
+      { key: 'pattern', label: 'Traffic Pattern', type: 'select', defaultValue: 'steady', options: [
+        { value: 'steady', label: 'Steady (constant rate)' },
+        { value: 'bursty', label: 'Bursty (periodic spikes)' },
+        { value: 'ramp', label: 'Ramp Up (gradual increase)' },
+      ]},
+      { key: 'duration', label: 'Test Duration (seconds)', type: 'number', defaultValue: 30, min: 1, max: 300 },
+    ],
+    outputs: [
+      { key: 'allowed', label: 'Requests Allowed', type: 'number' },
+      { key: 'rejected', label: 'Requests Rejected', type: 'number' },
+      { key: 'rejectionRate', label: 'Rejection Rate', type: 'number', unit: '%' },
+      { key: 'timeline', label: 'Timeline (allowed/rejected per sec)', type: 'text' },
+    ],
+    compute: (inputs) => {
+      const algorithm = inputs.algorithm as string;
+      const rate = inputs.rate as number;
+      const burst = inputs.burst as number;
+      const pattern = inputs.pattern as string;
+      const duration = inputs.duration as number;
+
+      let tokens = burst;
+      let allowed = 0;
+      let rejected = 0;
+      const timeline: string[] = [];
+
+      for (let t = 0; t < duration; t++) {
+        let reqThisSec = 0;
+        if (pattern === 'steady') reqThisSec = rate * 1.5;
+        else if (pattern === 'bursty') reqThisSec = (t % 5 === 0) ? rate * 5 : rate * 0.5;
+        else if (pattern === 'ramp') reqThisSec = Math.floor(rate * 1.5 * (t / duration));
+        reqThisSec = Math.max(1, Math.round(reqThisSec));
+
+        let secAllowed = 0;
+        let secRejected = 0;
+
+        for (let r = 0; r < reqThisSec; r++) {
+          let pass = false;
+          if (algorithm === 'tokenbucket') {
+            if (tokens >= 1) { tokens--; pass = true; }
+          } else if (algorithm === 'leakybucket') {
+            // Leaky bucket: process at fixed rate, queue up to burst
+            if (tokens < burst) { tokens++; pass = true; }
+          } else if (algorithm === 'slidingwindow') {
+            // Simplified: similar to token bucket for this sim
+            if (tokens >= 1) { tokens--; pass = true; }
+          } else if (algorithm === 'fixedwindow') {
+            if (tokens >= 1) { tokens--; pass = true; }
+          }
+          if (pass) { allowed++; secAllowed++; } else { rejected++; secRejected++; }
+        }
+
+        // Refill tokens
+        if (algorithm === 'tokenbucket') {
+          tokens = Math.min(burst, tokens + rate);
+        } else if (algorithm === 'leakybucket') {
+          tokens = Math.max(0, tokens - rate);
+        } else if (algorithm === 'slidingwindow') {
+          tokens = Math.min(burst, tokens + rate);
+        } else if (algorithm === 'fixedwindow') {
+          if (t % 1 === 0) tokens = burst;
+        }
+
+        timeline.push(`${t}s: ✓${secAllowed} ✗${secRejected}`);
+      }
+
+      return {
+        allowed,
+        rejected,
+        rejectionRate: Math.round((rejected / (allowed + rejected || 1)) * 10000) / 100,
+        timeline: timeline.join('\n'),
+      };
+    },
+    tags: ['rate-limit', 'token-bucket', 'leaky-bucket', 'sliding-window', 'api-gateway'],
+  },
+  {
+    id: 'circuit-breaker-simulator',
+    name: 'Circuit Breaker Simulator',
+    shortName: 'Circuit Breaker',
+    description: 'Simulate circuit breaker state machine with failure injection',
+    category: 'reliability',
+    difficulty: 'intermediate',
+    estimatedTimeMinutes: 10,
+    icon: '🔌',
+    color: 'text-red-400',
+    inputs: [
+      { key: 'failureRate', label: 'Failure Rate (%)', type: 'number', defaultValue: 30, min: 0, max: 100 },
+      { key: 'threshold', label: 'Failure Threshold (%)', type: 'number', defaultValue: 50, min: 1, max: 100 },
+      { key: 'windowSize', label: 'Window Size (requests)', type: 'number', defaultValue: 10, min: 5, max: 100 },
+      { key: 'timeout', label: 'Timeout (seconds)', type: 'number', defaultValue: 30, min: 1, max: 300 },
+      { key: 'totalRequests', label: 'Total Requests', type: 'number', defaultValue: 100, min: 10, max: 1000 },
+    ],
+    outputs: [
+      { key: 'stateTimeline', label: 'State Timeline', type: 'text' },
+      { key: 'successRate', label: 'Overall Success Rate', type: 'number', unit: '%' },
+      { key: 'trippedCount', label: 'Times Tripped', type: 'number' },
+      { key: 'finalState', label: 'Final State', type: 'text' },
+    ],
+    compute: (inputs) => {
+      const failureRate = (inputs.failureRate as number) / 100;
+      const threshold = (inputs.threshold as number) / 100;
+      const windowSize = inputs.windowSize as number;
+      const timeout = inputs.timeout as number;
+      const totalRequests = inputs.totalRequests as number;
+
+      let state = 'CLOSED';
+      let failureCount = 0;
+      let requestCount = 0;
+      let trippedCount = 0;
+      let timeInOpen = 0;
+      const timeline: string[] = [];
+      let successCount = 0;
+
+      for (let i = 0; i < totalRequests; i++) {
+        const isFailure = Math.random() < failureRate;
+
+        if (state === 'OPEN') {
+          timeInOpen++;
+          if (timeInOpen >= timeout) {
+            state = 'HALF_OPEN';
+            timeInOpen = 0;
+          }
+          timeline.push(`Req ${i + 1}: ${state} (rejected)`);
+          continue;
+        }
+
+        requestCount++;
+        if (isFailure) {
+          failureCount++;
+        } else {
+          successCount++;
+        }
+
+        // Check threshold
+        const currentRate = failureCount / requestCount;
+        if (state === 'CLOSED' && currentRate >= threshold && requestCount >= windowSize) {
+          state = 'OPEN';
+          trippedCount++;
+          failureCount = 0;
+          requestCount = 0;
+          timeline.push(`Req ${i + 1}: ${state} (tripped!)`);
+          continue;
+        }
+
+        if (state === 'HALF_OPEN') {
+          if (!isFailure) {
+            state = 'CLOSED';
+            failureCount = 0;
+            requestCount = 0;
+            timeline.push(`Req ${i + 1}: ${state} (recovered)`);
+          } else {
+            state = 'OPEN';
+            trippedCount++;
+            timeInOpen = 0;
+            timeline.push(`Req ${i + 1}: ${state} (re-tripped)`);
+          }
+          continue;
+        }
+
+        timeline.push(`Req ${i + 1}: ${state} (${isFailure ? 'fail' : 'ok'})`);
+      }
+
+      return {
+        stateTimeline: timeline.join('\n'),
+        successRate: Math.round((successCount / totalRequests) * 10000) / 100,
+        trippedCount,
+        finalState: state,
+      };
+    },
+    tags: ['circuit-breaker', 'resilience', 'fault-tolerance', 'state-machine', 'hystrix'],
+  },
+  {
+    id: 'sharding-visualizer',
+    name: 'Database Sharding Visualizer',
+    shortName: 'Sharding',
+    description: 'Visualize shard key distribution and rebalancing across shards',
+    category: 'data',
+    difficulty: 'advanced',
+    estimatedTimeMinutes: 10,
+    icon: '🔪',
+    color: 'text-green-400',
+    inputs: [
+      { key: 'shards', label: 'Number of Shards', type: 'number', defaultValue: 4, min: 2, max: 64 },
+      { key: 'keys', label: 'Number of Keys', type: 'number', defaultValue: 1000, min: 100, max: 100000 },
+      { key: 'keyDistribution', label: 'Key Distribution', type: 'select', defaultValue: 'uniform', options: [
+        { value: 'uniform', label: 'Uniform' },
+        { value: 'zipfian', label: 'Zipfian (hot keys)' },
+        { value: 'sequential', label: 'Sequential (time-series)' },
+        { value: 'user_id', label: 'User ID (realistic)' },
+      ]},
+      { key: 'algorithm', label: 'Sharding Algorithm', type: 'select', defaultValue: 'hash', options: [
+        { value: 'hash', label: 'Hash-based' },
+        { value: 'range', label: 'Range-based' },
+        { value: 'consistent', label: 'Consistent Hash' },
+      ]},
+    ],
+    outputs: [
+      { key: 'distribution', label: 'Keys per Shard', type: 'text' },
+      { key: 'imbalance', label: 'Imbalance Ratio (max/avg)', type: 'number' },
+      { key: 'hotShards', label: 'Hot Shards (>2x avg)', type: 'number' },
+      { key: 'visualization', label: 'Shard Distribution', type: 'text' },
+    ],
+    compute: (inputs) => {
+      const shardCount = inputs.shards as number;
+      const keyCount = inputs.keys as number;
+      const distribution = inputs.keyDistribution as string;
+      const algorithm = inputs.algorithm as string;
+
+      const shardCounts = new Array(shardCount).fill(0);
+
+      for (let i = 0; i < keyCount; i++) {
+        let key: number;
+        if (distribution === 'uniform') {
+          key = Math.random();
+        } else if (distribution === 'zipfian') {
+          key = Math.pow(Math.random(), 1.2);
+        } else if (distribution === 'sequential') {
+          key = i / keyCount;
+        } else if (distribution === 'user_id') {
+          key = Math.random() < 0.8 ? Math.random() * 0.2 : Math.random() * 0.8 + 0.2;
+        } else {
+          key = Math.random();
+        }
+
+        let shardIdx = 0;
+        if (algorithm === 'hash') {
+          shardIdx = Math.floor(key * shardCount) % shardCount;
+        } else if (algorithm === 'range') {
+          shardIdx = Math.floor(key * shardCount);
+        } else if (algorithm === 'consistent') {
+          // Simplified consistent hash
+          const hash = Math.floor(key * 1000000);
+          shardIdx = hash % shardCount;
+        }
+        shardIdx = Math.max(0, Math.min(shardCount - 1, shardIdx));
+        shardCounts[shardIdx]++;
+      }
+
+      const avg = keyCount / shardCount;
+      const max = Math.max(...shardCounts);
+      const imbalance = max / avg;
+      const hotShards = shardCounts.filter(c => c > avg * 2).length;
+
+      const maxCount = Math.max(...shardCounts);
+      const bars = shardCounts.map((c, i) => {
+        const barLen = Math.round((c / maxCount) * 40);
+        return `Shard ${i}: ${'█'.repeat(barLen)} ${c}`;
+      }).join('\n');
+
+      return {
+        distribution: shardCounts.join(', '),
+        imbalance: Math.round(imbalance * 100) / 100,
+        hotShards,
+        visualization: bars,
+      };
+    },
+    tags: ['sharding', 'database', 'partitioning', 'consistent-hash', 'distribution'],
+  },
 
   // ─── RELIABILITY & RESILIENCE ────────────────────────────
   {
