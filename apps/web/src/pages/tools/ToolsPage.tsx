@@ -4,7 +4,6 @@ import { useToolsStore } from '../../stores/toolsStore';
 import { TOOL_REGISTRY } from '../../components/tools/toolRegistry';
 import { TOOL_CATEGORIES, getCategoryConfig } from '../../types/tools';
 import type { ToolCategory, Tool } from '../../types/tools';
-import { ToolRouter } from './ToolRouter';
 
 // ─── Difficulty Badge ───────────────────────────────────────
 function DifficultyBadge({ difficulty }: { difficulty: Tool['difficulty'] }) {
@@ -22,11 +21,11 @@ function DifficultyBadge({ difficulty }: { difficulty: Tool['difficulty'] }) {
 
 // ─── Tool Card ───────────────────────────────────────────────
 function ToolCard({ tool }: { tool: Tool }) {
-  const { openTool, addToRecent } = useToolsStore();
+  const { addToRecent } = useToolsStore();
 
   const handleOpen = () => {
     addToRecent(tool.id);
-    openTool(tool.id);
+    window.location.hash = `tools/${tool.id}`;
   };
 
   return (
