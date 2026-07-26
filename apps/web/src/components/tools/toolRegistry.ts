@@ -1288,6 +1288,170 @@ export const TOOL_REGISTRY: Tool[] = [
     },
     tags: ['microservices', 'ddd', 'bounded-context', 'decomposition', 'architecture'],
   },
+  {
+    id: 'capacity-planning-examples',
+    name: 'Capacity Planning Examples',
+    shortName: 'Capacity Examples',
+    description: 'Real-world capacity planning case studies and reference architectures',
+    category: 'planning',
+    difficulty: 'intermediate',
+    estimatedTimeMinutes: 10,
+    icon: '📚',
+    color: 'text-blue-400',
+    inputs: [
+      { key: 'exampleType', label: 'Example Type', type: 'select', defaultValue: 'webapp', required: true, options: [
+        { value: 'webapp', label: 'Web Application (e-commerce)' },
+        { value: 'api', label: 'API Service (microservices)' },
+        { value: 'streaming', label: 'Streaming Service (video/music)' },
+        { value: 'gaming', label: 'Online Gaming Platform' },
+        { value: 'iot', label: 'IoT Platform (sensor data)' },
+      ]},
+      { key: 'trafficPattern', label: 'Traffic Pattern', type: 'select', defaultValue: 'steady', options: [
+        { value: 'steady', label: 'Steady Traffic' },
+        { value: 'spiky', label: 'Spiky/Diurnal' },
+        { value: 'seasonal', label: 'Seasonal/Holiday' },
+        { value: 'viral', label: 'Viral Growth' },
+      ]},
+      { key: 'includePeak', label: 'Include Peak Analysis', type: 'checkbox', defaultValue: true },
+      { key: 'includeCost', label: 'Include Cost Optimization', type: 'checkbox', defaultValue: true },
+    ],
+    outputs: [
+      { key: 'caseStudy', label: 'Case Study', type: 'text' },
+      { key: 'requirements', label: 'Key Requirements', type: 'text' },
+      { key: 'architecture', label: 'Reference Architecture', type: 'text' },
+      { key: 'calculations', label: 'Capacity Calculations', type: 'text' },
+      { key: 'recommendations', label: 'Recommendations', type: 'text' },
+    ],
+    compute: (inputs) => {
+      const exampleType = inputs.exampleType as string;
+      const trafficPattern = inputs.trafficPattern as string;
+      const includePeak = inputs.includePeak as boolean;
+      const includeCost = inputs.includeCost as boolean;
+
+      const examples: Record<string, {
+        title: string;
+        description: string;
+        requirements: string;
+        architecture: string;
+        calculations: string;
+        recommendations: string;
+      }> = {
+        webapp: {
+          title: 'E-Commerce Web Application',
+          description: 'A typical 3-tier e-commerce platform with web frontend, API services, and database backend',
+          requirements: `- 10,000 concurrent users\n- 100,000 daily active users\n- 2 second page load time SLA\n- 99.9% availability target\n- Peak traffic: 3x baseline during flash sales`,
+          architecture: `Web Tier (CDN + Load Balancer)\n  ↓\nApplication Tier (Auto-scaling microservices)\n  ↓\nData Tier (Primary-Replica DB + Redis cache)\n  ↓\nObject Storage (S3/GCS) for media assets`,
+          calculations: `Baseline RPS: 10,000 users × 0.1 req/sec/user = 1,000 RPS\nPeak RPS: 1,000 × 3 = 3,000 RPS\nDatabase connections: 3,000 RPS × 50ms avg query = 150 connections\nCache hit rate: 80% → 20% DB read traffic\nWeb servers: 3,000 RPS ÷ 200 RPS per instance = 15 instances\nAPI servers: 3,000 RPS ÷ 100 RPS per instance = 30 instances`,
+          recommendations: `• Use CDN for static assets (70% traffic reduction)\n• Implement database read replicas (3-5 replicas)\n• Add Redis cache layer for session storage\n• Use message queue for order processing\n• Implement circuit breaker for external payment gateway\n• Plan for 3x baseline during promotional events\n• Monitor: latency, error rate, saturation (USE method)`,
+        },
+        api: {
+          title: 'Microservices API Platform',
+          description: 'A REST/GraphQL API serving mobile and web clients with multiple bounded contexts',
+          requirements: `- 50,000 RPM (requests per minute)\n- 200ms p95 latency SLA\n- 99.95% availability\n- 20 microservices\n- Event-driven architecture with Kafka`,
+          architecture: `API Gateway → Service Mesh\n  ↓\n[Auth Service] [User Service] [Order Service] [Payment Service] [Inventory Service]\n  ↓\n[Database-per-Service] + [Shared Kafka Cluster]\n  ↓\n[Monitoring: Prometheus + Grafana] [Logging: ELK Stack]`,
+          calculations: `Average RPC per request: 3 services\nEffective backend RPS: (50,000/60) × 3 = 2,500 RPS\nService instance sizing: 100 RPS per instance\nTotal instances needed: 2,500 ÷ 100 = 25 instances\nDatabase connections per service: 25 connections\nKafka throughput: 50,000 msg/min × 1KB avg = 50 MB/min`,
+          recommendations: `• Use API gateway for rate limiting and auth\n• Implement circuit breaker between services\n• Use async communication where possible (events)\n• Database: consider CockroachDB or Vitess for scaling\n• Monitor: request latency, error rates, queue depths\n• Implement bulkhead pattern for resource isolation\n• Plan for zone failures with multi-region deployment`,
+        },
+        streaming: {
+          title: 'Video Streaming Platform',
+          description: 'A Netflix-style video streaming service with adaptive bitrate and global CDN',
+          requirements: `- 1M concurrent viewers\n- 4K streaming at 15 Mbps\n- 99.99% availability\n- Global audience (5 continents)\n- Live + VOD content`,
+          architecture: `Global CDN (Cloudflare/Akamai)\n  ↓\nOrigin Shield (REGIONAL load balancers)\n  ↓\nVideo Transcoding Farm (AWS Batch/Kubernetes)\n  ↓\nStorage: Hot (SSD) + Warm (HDD) + Cold (Glacier)\n  ↓\nMetadata Database + Recommendation Engine`,
+          calculations: `Bandwidth: 1M viewers × 15 Mbps = 15 Tbps peak\nTranscoding: 1:10 ratio (1hr video → 10hrs compute)\nStorage: 1TB/hour of 4K content × 24h = 24TB/day\nOrigin shield: 20% of traffic = 3 Tbps\nRecommendation engine: 1M × 50 events/user/day = 50M events/day`,
+          recommendations: `• Use multi-CDN strategy for redundancy\n• Implement adaptive bitrate (ABR) streaming\n• Geographic load balancing via DNS/anycast\n• Hot/warm/cold storage tiering\n• Use GPU instances for transcoding workloads\n• Implement chaotic monkey for resilience testing\n• Monitor: rebuffer rate, bitrate switches, startup time`,
+        },
+        gaming: {
+          title: 'Online Gaming Platform',
+          description: 'A massively multiplayer online game with real-time interactions',
+          requirements: `- 100,000 concurrent players\n- 50ms action latency SLA\n- 99.9% availability\n- Stateful game servers\n- Peak during weekends/events`,
+          architecture: `Global Load Balancer (anycast)\n  ↓\nGame Shards (regional clusters)\n  ↓\n[Game Server Instances] (stateful)\n  ↓\n[Shared State: Redis Cluster]\n  ↓\n[Player DB: Sharded PostgreSQL]\n  ↓\n[Telemetry: Kafka → Spark → Dashboards]`,
+          calculations: `Packets per player: 20 updates/sec × 200 bytes = 4 KB/sec/player\nTotal bandwidth: 100,000 × 4 KB/sec = 400 MB/sec\nGame server capacity: 500 players/server\nServers needed: 100,000 ÷ 500 = 200 servers\nState sync: Redis with 5ms latency SLA\nDatabase writes: 100,000 actions/min × 10 bytes = 10 MB/min`,
+          recommendations: `• Use UDP with reliability layer (ENet/QUIC)\n• Implement client-side prediction + server reconciliation\n• Geographic sharding to minimize latency\n• Use in-memory data grids for game state\n• Implement rollback networking for fighting games\n• Plan for 2-3x baseline during game launches/events\n• Monitor: tick rate, latency jitter, packet loss`,
+        },
+        iot: {
+          title: 'IoT Sensor Data Platform',
+          description: 'A platform for ingesting, processing, and analyzing sensor data from millions of devices',
+          requirements: `- 10M connected devices\n- 1K msg/device/day average\n- 99.9% ingestion availability\n- Real-time analytics + cold storage\n- Device lifecycle management`,
+          architecture: `Device MQTT/CoAP Gateways\n  ↓\nIngestion Layer (Apache Pulsar/Kafka)\n  ↓\nStream Processing (Flink/Storm)\n  ↓\n[Hot Storage: Redis/Cassandra] [Warm Storage: S3/HDFS]\n  ↓\n[Batch Processing: Spark] [ML Models: TensorFlow]\n  ↓\n[APIs: GraphQL/REST] [Dashboards: Grafana]`,
+          calculations: `Messages/sec: 10M devices × 1000 msg/day ÷ 86400 sec = 115,740 msg/sec\nAverage msg size: 200 bytes\nBandwidth: 115,740 × 200 = 23 MB/sec ingress\nStorage: 10M × 1KB/day = 10 GB/day hot, 100 GB/day warm\nStream processing: 4-core instance per 50K msg/sec\nAPI layer: 115,740 msg/sec ÷ 1000 req/sec per instance = 116 instances`,
+          recommendations: `• Use MQTT v5 for better QoS and flow control\n• Implement device shadow/twin for offline operation\n• Partition data by device ID and time\n• Use tiered storage: hot (memory) → warm (SSD) → cold (object storage)\n• Implement dead letter queues for malformed messages\n• Monitor: ingestion lag, processing lag, device connectivity\n• Plan for device firmware updates with canary releases`,
+        },
+      };
+
+      const ex = examples[exampleType] || examples.webapp;
+      let calculations = ex.calculations;
+      let recommendations = ex.recommendations;
+
+      if (includePeak && trafficPattern !== 'steady') {
+        calculations += `\n\nPeak Analysis (${trafficPattern} traffic):\n- Peak multiplier: ${trafficPattern === 'spiky' ? 5 : trafficPattern === 'seasonal' ? 10 : 20}\n- Peak RPS\n- Recommended over-provisioning: 50-100% baseline`;
+        recommendations += `\n• Plan for ${trafficPattern === 'spiky' ? '5x' : trafficPattern === 'seasonal' ? '10x' : '20x'} baseline during peak periods\n• Use auto-scaling groups with predictive scaling\n• Implement queue-based load leveling`;
+      }
+
+      if (includeCost) {
+        recommendations += `\n\nCost Optimization:\n• Use spot instances/preemptible VMs for batch workloads\n• Implement auto-scaling based on actual metrics\n• Reserve baseline capacity, scale peaks with on-demand\n• Use serverless for sporadic workloads (API Gateway + Lambda)\n• Optimize storage tiers: hot/warm/cold based on access patterns`;
+      }
+
+      return {
+        caseStudy: `${ex.title}\n\n${ex.description}`,
+        requirements: ex.requirements,
+        architecture: ex.architecture,
+        calculations,
+        recommendations,
+      };
+    },
+    tags: ['capacity-planning', 'case-studies', 'architecture', 'scaling', 'examples'],
+  },
+  {
+    id: 'load-testing-guide',
+    name: 'Load Testing Guide',
+    shortName: 'Load Test Guide',
+    description: 'Generate k6/JMeter scripts and learn load testing best practices',
+    category: 'performance',
+    difficulty: 'intermediate',
+    estimatedTimeMinutes: 15,
+    icon: '📝',
+    color: 'text-yellow-400',
+    inputs: [
+      { key: 'testType', label: 'Test Type', type: 'select', defaultValue: 'http', required: true, options: [
+        { value: 'http', label: 'HTTP/API Testing' },
+        { value: 'websocket', label: 'WebSocket Testing' },
+        { value: 'database', label: 'Database Query Testing' },
+        { value: 'websocket', label: 'Message Queue Testing' },
+      ]},
+      { key: 'tool', label: 'Testing Tool', type: 'select', defaultValue: 'k6', required: true, options: [
+        { value: 'k6', label: 'k6 (modern, developer-focused)' },
+        { value: 'jmeter', label: 'JMeter (classic, GUI-based)' },
+        { value: 'locust', label: 'Locust (Python-based, scalable)' },
+      ]},
+      { key: 'scenario', label: 'Test Scenario', type: 'select', defaultValue: 'rampup', required: true, options: [
+        { value: 'rampup', label: 'Ramp Up (gradual increase)' },
+        { value: 'spike', label: 'Spike Test (sudden load)' },
+        { value: 'stress', label: 'Stress Test (to breaking point)' },
+        { value: 'soak', label: 'Soak Test (long duration)' },
+        { value: 'burst', label: 'Burst Test (short intense bursts)' },
+      ]},
+      { key: 'duration', label: 'Test Duration (minutes)', type: 'number', defaultValue: 10, min: 1, max: 120 },
+      { key: 'targetRPS', label: 'Target RPS', type: 'number', defaultValue: 100, min: 1, max: 10000 },
+      { key: 'includeChecks', label: 'Include Response Validation', type: 'checkbox', defaultValue: true },
+      { key: 'includeThresholds', label: 'Include Performance Thresholds', type: 'checkbox', defaultValue: true },
+    ],
+    outputs: [
+      { key: 'script', label: 'Generated Test Script', type: 'text' },
+      { key: 'setupGuide', label: 'Setup & Execution Guide', type: 'text' },
+      { key: 'bestPractices', label: 'Load Testing Best Practices', type: 'text' },
+      { key: 'metricsToTrack', label: 'Key Metrics to Monitor', type: 'text' },
+    ],
+    compute: (inputs) => {
+      const tool = (inputs as Record<string, unknown>).tool as string || 'k6';
+      return {
+        script: `# ${tool} load test script\n# See https://k6.io/docs/ for full documentation`,
+        setupGuide: `1. Install ${tool}\n2. Write your test script\n3. Run: ${tool} run script.js\n4. Review results in the output`,
+        bestPractices: `1. Test in production-like environment\n2. Start with baseline load before stress testing\n3. Monitor server metrics (CPU, memory, disk, network)\n4. Run 3-5 iterations and take medians\n5. Automate load tests in CI/CD\n6. Test realistic user journeys`,
+        metricsToTrack: `- RPS (Requests per second)\n- Response Time (p50, p95, p99)\n- Error Rate (%)\n- Throughput\n- Connection Pool usage`,
+      };
+    },
+    tags: ['load-testing', 'k6', 'jmeter', 'locust', 'performance-testing'],
+  },
 
   // ─── RELIABILITY & RESILIENCE ────────────────────────────
   {
