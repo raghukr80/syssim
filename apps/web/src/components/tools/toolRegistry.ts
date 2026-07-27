@@ -1494,4 +1494,107 @@ export const TOOL_REGISTRY: Tool[] = [
     },
     tags: ['reliability', 'availability', 'mtbf', 'mttr', 'error-budget', 'slo'],
   },
+  {
+    id: 'ai-system-design',
+    name: 'AI System Design Generator',
+    shortName: 'AI System',
+    description: 'Generate system design prompts for AI architectures (Claude, ChatGPT, Gemini) with customizable architecture styles.',
+    category: 'architecture',
+    difficulty: 'advanced',
+    estimatedTimeMinutes: 15,
+    icon: '🤖',
+    color: 'text-purple-400',
+    inputs: [
+      { key: 'archType', label: 'Architecture Type', type: 'select', defaultValue: 'layered', required: true, options: [
+        { value: 'layered', label: 'Layered Architecture' },
+        { value: 'event-driven', label: 'Event-Driven Architecture' },
+        { value: 'microservices', label: 'Microservices Architecture' },
+        { value: 'serverless', label: 'Serverless Architecture' },
+        { value: 'hybrid', label: 'Hybrid Architecture' }
+      ]},
+      { key: 'aiType', label: 'AI Type', type: 'select', defaultValue: 'generative', required: true, options: [
+        { value: 'generative', label: 'Generative AI (LLM)' },
+        { value: 'nlp', label: 'Natural Language Processing' },
+        { value: 'computer_vision', label: 'Computer Vision' },
+        { value: 'reinforcement_learning', label: 'Reinforcement Learning' }
+      ]},
+      { key: 'promptStyle', label: 'Prompt Style', type: 'select', defaultValue: 'engineering', options: [
+        { value: 'engineering', label: 'Systems Engineering' },
+        { value: 'business', label: 'Business Requirements' },
+        { value: 'technical', label: 'Technical Specifications' }
+      ]},
+      { key: 'outputFormat', label: 'Output Format', type: 'select', defaultValue: 'prompt', options: [
+        { value: 'prompt', label: 'Chat Prompt' },
+        { value: 'md', label: 'Markdown' },
+        { value: 'text', label: 'Pure Text' }
+      ]}
+    ],
+    outputs: [
+      { key: 'prompt', label: 'Generated Prompt', type: 'text' },
+      { key: 'architectureNotes', label: 'Architecture Analysis', type: 'text' },
+      { key: 'implementationGuide', label: 'Implementation Guide', type: 'text' }
+    ],
+    compute: (inputs) => {
+      const archType = inputs.archType as string;
+      const aiType = inputs.aiType as string;
+      const promptStyle = inputs.promptStyle as string;
+      const outputFormat = inputs.outputFormat as string;
+
+      const aiSpecs: Record<string, string> = {
+        generative: "- Large Language Models (LLMs) for text generation\n- Vector databases for semantic search\n- Prompt engineering and caching layers\n- GPU-optimized inference serving\n- Continuous fine-tuning pipeline",
+        nlp: "- Tokenization and text preprocessing pipelines\n- Named Entity Recognition (NER) services\n- Sentiment analysis and text classification\n- Language translation and summarization models\n- Dependency parsing and syntactic analysis",
+        computer_vision: "- Image preprocessing and augmentation pipelines\n- Object detection and classification models\n- Facial recognition and biometric systems\n- Video processing and action recognition\n- Medical imaging and diagnostic assistance systems",
+        reinforcement_learning: "- Simulation environments for agent training\n- Experience replay buffers\n- Policy and value networks\n- Reward shaping and optimization frameworks\n- Multi-agent coordination systems"
+      };
+
+      const styleSpecs: Record<string, string> = {
+        layered: "- Separation of concerns between layers\n- Strict layer-to-layer communication\n- Easy to test and maintain\n- Clear dependency hierarchy",
+        'event-driven': "- Loose coupling between components\n- High scalability and fault tolerance\n- Real-time processing capabilities\n- Event sourcing and audit trails",
+        microservices: "- Independent deployable services\n- Technology diversity per service\n- Fine-grained scaling\n- Service discovery and load balancing",
+        serverless: "- No server management required\n- Automatic scaling to zero\n- Pay-per-execution pricing model\n- Reduced operational overhead",
+        hybrid: "- Combines strengths of multiple patterns\n- Flexibility to choose best tool for each job\n- Optimized for specific workloads\n- Can evolve over time as requirements change"
+      };
+
+      let prompt = '';
+      let notes = '';
+
+      switch (archType) {
+        case 'layered':
+          prompt = `Design a layered architecture for an ${aiType} system:\n\n1. Presentation/API Layer\n2. Application/Service Layer\n3. AI/ML Processing Layer\n4. Data Storage & Management Layer\n5. Infrastructure Layer\n\nAI Components (${aiType}):\n${aiSpecs[aiType]}\n\nArchitecture Style (${promptStyle}):\n${styleSpecs[archType]}`;
+          notes = `Layered architectures offer clear separation of concerns and are easy to test. For AI systems, the ML processing layer should be designed for horizontal scaling.`;
+          break;
+        case 'event-driven':
+          prompt = `Design an event-driven architecture for an ${aiType} system:\n\n1. Event Producers (Data Sources, APIs, Sensors)\n2. Event Bus/Message Queue (Apache Kafka, AWS SQS, RabbitMQ)\n3. Event Consumers (AI Services, Processing Workers)\n4. Event Store & Audit Log\n5. State Management & Caching Layer\n6. AI Model Serving & Inference Engines\n7. Monitoring & Observability Layer\n\nAI Components (${aiType}):\n${aiSpecs[aiType]}\n\nArchitecture Style (${promptStyle}):\n${styleSpecs[archType]}`;
+          notes = `Event-driven architectures provide loose coupling and excellent scalability. Ideal for real-time AI applications with high throughput requirements.`;
+          break;
+        case 'microservices':
+          prompt = `Design a microservices architecture for an ${aiType} system:\n\n1. API Gateway Service\n2. Authentication & Authorization Service\n3. Data Ingestion Service\n4. Data Preprocessing Service\n5. Feature Engineering Service\n6. Model Training Service\n7. Model Serving/Inference Service\n8. Model Registry & Versioning Service\n9. Monitoring & Logging Service\n10. Configuration & Deployment Service\n\nAI Components (${aiType}):\n${aiSpecs[aiType]}\n\nArchitecture Style (${promptStyle}):\n${styleSpecs[archType]}`;
+          notes = `Microservices enable independent scaling and technology diversity. Each AI component can be independently deployed and scaled based on workload.`;
+          break;
+        case 'serverless':
+          prompt = `Design a serverless architecture for an ${aiType} system:\n\n1. API Gateway (AWS API Gateway, Azure Functions)\n2. Event Triggers (S3, DynamoDB Streams, Pub/Sub)\n3. Compute Functions (AWS Lambda, Azure Functions)\n4. Data Storage (S3, DynamoDB, Cosmos DB)\n5. Message Queues (SQS, Service Bus)\n6. AI Model Storage (S3 Blob Storage)\n7. Orchestration (Step Functions, Durable Functions)\n8. Monitoring & Logging (CloudWatch, Application Insights)\n\nAI Components (${aiType}):\n${aiSpecs[aiType]}\n\nArchitecture Style (${promptStyle}):\n${styleSpecs[archType]}`;
+          notes = `Serverless architectures provide automatic scaling and pay-per-execution pricing. Ideal for sporadic AI workloads and cost-sensitive applications.`;
+          break;
+        case 'hybrid':
+          prompt = `Design a hybrid architecture combining multiple patterns for an ${aiType} system:\n\n1. Core AI Processing (Microservices for high-throughput inference)\n2. Event-Driven Data Pipeline (Kafka for real-time data ingestion)\n3. Serverless Components (Lambda for sporadic tasks/ETL)\n4. Layered Data Storage (Hot/Warm/Cold storage tiers)\n5. API Gateway Layer (REST + GraphQL endpoints)\n6. Stream Processing Layer (Flink/Spark for batch/stream)\n7. Cache Layer (Redis/Memcached for frequent access)\n8. Batch Processing Layer (Airflow for scheduled jobs)\n\nAI Components (${aiType}):\n${aiSpecs[aiType]}\n\nArchitecture Style (${promptStyle}):\n${styleSpecs[archType]}`;
+          notes = `Hybrid architectures combine the best of multiple patterns. Provide flexibility to optimize each layer for specific workloads and requirements.`;
+          break;
+        default:
+          prompt = `Design a scalable architecture for an ${aiType} system using ${promptStyle} principles:\n\n1. Define clear boundaries between data ingestion, processing, storage, and serving layers\n2. Implement asynchronous processing where possible\n3. Design for horizontal scaling and fault tolerance\n4. Include monitoring, logging, and observability from the start\n5. Plan for model versioning, A/B testing, and continuous deployment\n6. Ensure data privacy, security, and compliance requirements are met`;
+          notes = `Default architecture follows systems engineering best practices for robust, scalable AI deployments.`;
+      }
+
+      const implementation = `Implementation Steps:\n\n1. Requirements Gathering\n   - Define AI use cases and success metrics\n   - Identify data sources and volumes\n   - Determine latency and throughput requirements\n   - Establish security and compliance needs\n\n2. Architecture Design\n   - Select appropriate ${archType} pattern\n   - Define service boundaries and interfaces\n   - Choose technology stack and frameworks\n   - Plan data flow and storage strategies\n\n3. Infrastructure Setup\n   - Provision compute, storage, and networking\n   - Set up CI/CD pipelines\n   - Configure monitoring and alerting\n   - Establish development/staging/production environments\n\n4. Development Phase\n   - Implement data ingestion pipelines\n   - Build AI/ML processing services\n   - Create APIs and integration points\n   - Implement logging, monitoring, and tracing\n\n5. Testing & Validation\n   - Unit and integration testing\n   - Performance and load testing\n   - AI model validation and accuracy testing\n   - Chaos engineering and failure injection\n\n6. Deployment & Operations\n   - Blue-green or canary deployment strategies\n   - Model versioning and rollback procedures\n   - Performance optimization and tuning\n   - Continuous learning and improvement cycles\n\nTechnology Recommendations:\n- Compute: Kubernetes, AWS ECS/EKS, or Azure AKS\n- Streaming: Apache Kafka, AWS Kinesis, or Google Pub/Sub\n- Storage: PostgreSQL/MongoDB for metadata, S3/MinIO for blobs\n- Caching: Redis or Memcached\n- Monitoring: Prometheus + Grafana, ELK stack, or Datadog\n- AI/ML: TensorFlow/PyTorch, Hugging Face, or SageMaker`;
+
+      if (outputFormat === 'md') {
+        return {
+                  prompt: `# AI System Design Generated Prompt\n\n${prompt.replace(/\n/g, '\n\n')}`,
+                  architectureNotes: `# Architecture Analysis\n\n${notes}`,
+                  implementationGuide: `# Implementation Guide\n\n${implementation.replace(/\n/g, '\n\n')}`
+                };
+              }
+      return { prompt, architectureNotes: notes, implementationGuide: implementation };
+    },
+    tags: ['system-design', 'ai', 'architecture', 'prompt-engineering'],
+  },
 ];
