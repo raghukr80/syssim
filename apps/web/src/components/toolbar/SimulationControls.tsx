@@ -31,6 +31,7 @@ export function SimulationControls() {
     // Use JS simulation (WASM data format may not match)
     store.setSimState('running')
     startJSSimulation()
+    startWASMPolling()
   }
 
   const handlePause = () => {
